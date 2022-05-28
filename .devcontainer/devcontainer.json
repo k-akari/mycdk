@@ -1,0 +1,22 @@
+{
+  "name": "Go",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "mycdk",
+  "workspaceFolder": "/go/src/mycdk",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/ash",
+    "go.toolsManagement.checkForUpdates": "off",
+    "go.gopath": "/go",
+    "go.gocodeAutoBuild": true,
+    "go.formatTool": "gofmt",
+    "go.useLanguageServer": true,
+    "editor.formatOnSave": false,
+    "[go]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": false,
+    }
+  },
+  "extensions": [
+    "golang.go",
+  ],
+}
