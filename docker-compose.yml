@@ -9,6 +9,8 @@ services:
     container_name: mycdk
     tty: true
     stdin_open: true
+    env_file:
+      - aws.env
     volumes:
       - ~/.aws:/home/.aws
       - .:/go/src/mycdk
