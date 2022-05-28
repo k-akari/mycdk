@@ -1,0 +1,1 @@
+# Repository with AWS stack definitions written in CDK for Golang
