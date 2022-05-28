@@ -1,5 +1,5 @@
 {
-  "app": "go mod download && go run oidc_provider.go",
+  "app": "go mod download && go run main.go",
   "watch": {
     "include": [
       "**"
