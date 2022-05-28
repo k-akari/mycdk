@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  mycdk:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    command: /bin/ash
+    image: mycdk
+    container_name: mycdk
+    tty: true
+    stdin_open: true
+    volumes:
+      - ~/.aws:/home/.aws
+      - .:/go/src/mycdk
+      - ~/.ssh:/root/.ssh
+      - ~/.gitconfig:/root/.gitconfig
