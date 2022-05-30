@@ -12,7 +12,7 @@ services:
     env_file:
       - aws.env
     volumes:
-      - ~/.aws:/home/.aws
+      - ~/.aws:/root/.aws
       - .:/go/src/mycdk
       - ~/.ssh:/root/.ssh
       - ~/.gitconfig:/root/.gitconfig
