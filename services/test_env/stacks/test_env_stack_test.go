@@ -3,7 +3,7 @@ package stacks_test
 import (
 	"testing"
 
-	"test_env/stacks"
+	"github.com/k-akari/services/test_env/stacks"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"

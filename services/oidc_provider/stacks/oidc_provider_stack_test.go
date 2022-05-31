@@ -3,7 +3,7 @@ package stacks_test
 import (
 	"testing"
 
-	"oidc_provider/stacks"
+	"github.com/k-akari/services/oidc_provider/stacks"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"

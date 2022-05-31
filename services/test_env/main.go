@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"test_env/stacks"
+	"github.com/k-akari/services/test_env/stacks"
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/jsii-runtime-go"
