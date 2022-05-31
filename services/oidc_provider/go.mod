@@ -1,4 +1,4 @@
-module oidc_provider
+module github.com/k-akari/services/oidc_provider
 
 go 1.18
 

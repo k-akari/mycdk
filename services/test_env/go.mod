@@ -1,4 +1,4 @@
-module test_env
+module github.com/k-akari/services/test_env
 
 go 1.18
 
