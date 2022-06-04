@@ -62,7 +62,7 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{
 			{
-				MaxImageAge: cdk.Duration_Days(jsii.Number(1)),
+				MaxImageCount: jsii.Number(1),
 			},
 		},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
