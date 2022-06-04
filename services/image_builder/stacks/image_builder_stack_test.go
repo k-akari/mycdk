@@ -1,17 +1,18 @@
 package stacks_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/k-akari/services/image_builder/stacks"
 
-	"github.com/aws/aws-cdk-go/awscdk/v2"
+	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
-	"github.com/aws/jsii-runtime-go"
+	jsii "github.com/aws/jsii-runtime-go"
 )
 
 func TestImageBuilderStack(t *testing.T) {
-	app := awscdk.NewApp(nil)
+	app := cdk.NewApp(nil)
 	stack := stacks.NewImageBuilderStack(app, "MyStack", nil)
 
 	template := assertions.Template_FromStack(stack)
@@ -33,10 +34,31 @@ func TestImageBuilderStack(t *testing.T) {
 		"AvailabilityZone": assertions.Match_AnyValue(),
 		"CidrBlock": "10.0.0.0/24",
 	})
+	template.HasResourceProperties(jsii.String("AWS::IAM::Role"), map[string]interface{}{
+		"AssumeRolePolicyDocument": map[string]interface{}{
+			"Statement": []map[string]interface{}{
+				{
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Principal": map[string]string{
+						"Service": "codebuild.amazonaws.com",
+					},
+				},
+			},
+			"Version": assertions.Match_AnyValue(),
+		},
+		"Description": assertions.Match_AnyValue(),
+		"Path": "/",
+		"RoleName": "role-codebuild-for-image-builder",
+	})
 	template.HasResourceProperties(jsii.String("AWS::CodeBuild::Project"), map[string]interface{}{
 		"Artifacts": map[string]string{"Type": "NO_ARTIFACTS"},
 		"Environment": map[string]interface{}{
 			"ComputeType": "BUILD_GENERAL1_SMALL",
+			"EnvironmentVariables": []map[string]string{
+				{"Name": "AWS_ACCOUNT", "Type": "PLAINTEXT", "Value": os.Getenv("CDK_DEFAULT_ACCOUNT")},
+				{"Name": "AWS_REGION", "Type": "PLAINTEXT", "Value": os.Getenv("CDK_DEFAULT_REGION")},
+			},
 			"Image": "aws/codebuild/standard:1.0",
 			"PrivilegedMode": true,
 			"Type": "LINUX_CONTAINER",
@@ -48,8 +70,11 @@ func TestImageBuilderStack(t *testing.T) {
 			"Type": "GITHUB",
 		},
 		"Cache": map[string]string{"Type": "NO_CACHE"},
+		"ConcurrentBuildLimit": 1,
 		"Name": "ImageBuilerEntExample",
+		"QueuedTimeoutInMinutes": 60,
 		"SourceVersion": "main",
+		"TimeoutInMinutes": 20,
 		"Triggers": map[string]interface{}{"Webhook": true},
 	})
 	template.HasResourceProperties(jsii.String("AWS::ECR::Repository"), map[string]interface{}{
