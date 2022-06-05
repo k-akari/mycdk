@@ -17,23 +17,10 @@ func TestImageBuilderStack(t *testing.T) {
 
 	template := assertions.Template_FromStack(stack)
 
-	template.ResourceCountIs(jsii.String("AWS::EC2::VPC"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::Subnet"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::InternetGateway"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::VPCGatewayAttachment"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::RouteTable"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::Route"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::SubnetRouteTableAssociation"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::IAM::Role"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::CodeBuild::Project"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::ECR::Repository"), jsii.Number(1));
 
-	template.HasResourceProperties(jsii.String("AWS::EC2::VPC"), map[string]interface{}{
-		"CidrBlock": "10.0.0.0/16",
-	})
-	template.HasResourceProperties(jsii.String("AWS::EC2::Subnet"), map[string]interface{}{
-		"AvailabilityZone": assertions.Match_AnyValue(),
-		"CidrBlock": "10.0.0.0/24",
-	})
 	template.HasResourceProperties(jsii.String("AWS::IAM::Role"), map[string]interface{}{
 		"AssumeRolePolicyDocument": map[string]interface{}{
 			"Statement": []map[string]interface{}{
@@ -64,6 +51,7 @@ func TestImageBuilderStack(t *testing.T) {
 			"Type": "LINUX_CONTAINER",
 		},
 		"Source": map[string]interface{}{
+			"BuildSpec": "buildspec.yml",
 			"GitCloneDepth": 1,
 			"Location": "https://github.com/k-akari/ent-example.git",
 			"ReportBuildStatus": true,
