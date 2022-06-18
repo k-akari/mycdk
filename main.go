@@ -18,6 +18,7 @@ func main() {
 	_, cluster := stacks.NewEksClusterStack(app, "EksClusterStack", vpc, props)
 	stacks.NewManifestStack(app, "EksManifestStack", cluster, props)
 	stacks.NewImageBuilderStack(app, "EksImageBuilderStack", props)
+	stacks.NewDatabaseClusterStack(app, "EksDatabaseClusterStack", vpc, props)
 	//
 
 	// GitHubからOIDC認証でAWSへアクセスするための権限設定
