@@ -9,37 +9,12 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewEksClusterStack(scope constructs.Construct, id string, props *cdk.StackProps) cdk.Stack {
+func NewEksClusterStack(scope constructs.Construct, id string, vpc ec2.Vpc, props *cdk.StackProps) (cdk.Stack, eks.Cluster) {
 	var sprops cdk.StackProps
 	if props != nil {
 		sprops = *props
 	}
 	stack := cdk.NewStack(scope, &id, &sprops)
-
-	// 3AZにまたがるVPCの作成
-	// AZ毎にパブリックサブネットとNATゲートウェイへルートを向けたプライベートサブネットと完全に独立したプライベートサブネットを1つずつ作成
-	vpc := ec2.NewVpc(stack, jsii.String("VPCEKSCluster"), &ec2.VpcProps{
-		Cidr: jsii.String("10.0.0.0/16"),
-		MaxAzs: jsii.Number(3),
-		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
-			{
-				CidrMask: jsii.Number(24),
-				Name: jsii.String("subnet-for-eks-cluster-public"),
-				SubnetType: ec2.SubnetType_PUBLIC,
-			},
-			{
-				CidrMask: jsii.Number(24),
-				Name: jsii.String("subnet-for-eks-cluster-private-with-nat"),
-				SubnetType: ec2.SubnetType_PRIVATE_WITH_NAT,
-			},
-			{
-				CidrMask: jsii.Number(24),
-				Name: jsii.String("subnet-for-eks-cluster-private-isolated"),
-				SubnetType: ec2.SubnetType_PRIVATE_ISOLATED,
-			},
-		},
-		VpcName: jsii.String("vpc-for-eks-cluster"),
-	})
 
 	// EKSコントロールプレーンに付与するIAMロール
 	masterRole := iam.NewRole(stack, jsii.String("EKSMasterRole"), &iam.RoleProps{
@@ -121,45 +96,5 @@ func NewEksClusterStack(scope constructs.Construct, id string, props *cdk.StackP
 		},
 	})
 
-	// マニフェストの適用
-	eks.NewKubernetesManifest(stack, jsii.String("EKSAutoScaler"), &eks.KubernetesManifestProps{
-		Cluster: cluster,
-		Manifest: &[]*map[string]interface{}{
-			&map[string]interface{}{
-				"apiVersion": jsii.String("apps/v1"),
-				"kind": jsii.String("Deployment"),
-				"metadata": map[string]*string{
-					"name": jsii.String("hello-kubernetes"),
-				},
-				"spec": map[string]interface{}{
-					"replicas": jsii.Number(6),
-					"selector": map[string]map[string]*string{
-						"matchLabels": map[string]*string{
-							"app": jsii.String("hello"),
-						},
-					},
-					"template": map[string]interface{}{
-						"metadata": map[string]map[string]*string{
-							"labels": map[string]*string{
-								"app": jsii.String("hello"),
-							},
-						},
-						"spec": map[string]interface{}{
-							"containers": []map[string]interface{}{
-								map[string]interface{}{
-									"name": jsii.String("hello-kubernetes"),
-									"image": jsii.String("paulbouwer/hello-kubernetes:1.5"),
-									"ports": []map[string]*float64{
-										map[string]*float64{"containerPort": jsii.Number(8080),},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	})
-
-	return stack
+	return stack, cluster
 }

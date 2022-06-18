@@ -1,18 +1,17 @@
 package stacks_test
 
 import (
+	"mycdk/stacks"
 	"testing"
 
-	"github.com/k-akari/services/test_env/stacks"
-
-	"github.com/aws/aws-cdk-go/awscdk/v2"
+	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
-	"github.com/aws/jsii-runtime-go"
+	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func TestTestEnvStack(t *testing.T) {
-	app := awscdk.NewApp(nil)
-	stack := stacks.NewTestEnvStack(app, "MyStack", nil)
+func TestMyEc2Stack(t *testing.T) {
+	app := cdk.NewApp(nil)
+	stack := stacks.NewMyEc2Stack(app, "MyStack", nil)
 
 	template := assertions.Template_FromStack(stack)
 

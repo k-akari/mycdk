@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/k-akari/services/image_builder/stacks"
+	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -13,7 +13,12 @@ import (
 
 func TestImageBuilderStack(t *testing.T) {
 	app := cdk.NewApp(nil)
-	stack := stacks.NewImageBuilderStack(app, "MyStack", nil)
+	stack := stacks.NewImageBuilderStack(app, "MyStack", &cdk.StackProps{
+		Env: &cdk.Environment{
+	 		Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 		Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+		},
+	})
 
 	template := assertions.Template_FromStack(stack)
 
@@ -59,7 +64,7 @@ func TestImageBuilderStack(t *testing.T) {
 		},
 		"Cache": map[string]string{"Type": "NO_CACHE"},
 		"ConcurrentBuildLimit": 1,
-		"Name": "ImageBuilerEntExample",
+		"Name": "EKSImageBuildProject",
 		"QueuedTimeoutInMinutes": 60,
 		"SourceVersion": "main",
 		"TimeoutInMinutes": 20,
@@ -68,6 +73,6 @@ func TestImageBuilderStack(t *testing.T) {
 	template.HasResourceProperties(jsii.String("AWS::ECR::Repository"), map[string]interface{}{
 		"ImageScanningConfiguration": map[string]interface{}{"ScanOnPush": true},
 		"LifecyclePolicy": map[string]interface{}{"LifecyclePolicyText": assertions.Match_AnyValue()},
-		"RepositoryName": "ent-example",
+		"RepositoryName": "eks-app",
 	})
 }

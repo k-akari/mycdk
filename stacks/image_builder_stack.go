@@ -1,8 +1,6 @@
 package stacks
 
 import (
-	"os"
-
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	codebuild "github.com/aws/aws-cdk-go/awscdk/v2/awscodebuild"
 	ecr "github.com/aws/aws-cdk-go/awscdk/v2/awsecr"
@@ -18,8 +16,8 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 	}
 	stack := cdk.NewStack(scope, &id, &sprops)
 
-	// Create a IanRole to push image to ECR repository
-	role := iam.NewRole(stack, jsii.String("RoleCodeBuildImageBuilder"), &iam.RoleProps{
+	// DockerイメージをビルドしてECRへプッシュするIamRoleを作成
+	role := iam.NewRole(stack, jsii.String("EKSCodeBuildRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("codebuild.amazonaws.com"), &iam.ServicePrincipalOpts{}),
 		Description: jsii.String("Iam Role for CodeBuild Project to push image to ECR repository"),
       	Path: jsii.String("/"),
@@ -29,8 +27,8 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 		},
     })
 
-	// Create a CodeBuild project
-	codebuild.NewProject(stack, jsii.String("ProjectEntExample"), &codebuild.ProjectProps{
+	// 指定のリポジトリのmainブランチへの更新をトリガーとして、DockerイメージをビルドしECRリポジトリへイメージをプッシュするプロジェクトを作成
+	codebuild.NewProject(stack, jsii.String("EKSImageBuildProject"), &codebuild.ProjectProps{
 		BuildSpec: codebuild.BuildSpec_FromSourceFilename(jsii.String("buildspec.yml")),
 		ConcurrentBuildLimit: jsii.Number(1),
 		Environment: &codebuild.BuildEnvironment{
@@ -38,10 +36,10 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 			Privileged: jsii.Bool(true),
 		},
 		EnvironmentVariables: &map[string]*codebuild.BuildEnvironmentVariable{
-			"AWS_ACCOUNT": &codebuild.BuildEnvironmentVariable{Value: os.Getenv("CDK_DEFAULT_ACCOUNT")},
-			"AWS_REGION": &codebuild.BuildEnvironmentVariable{Value: os.Getenv("CDK_DEFAULT_REGION")},
+			"AWS_ACCOUNT": {Value: sprops.Env.Account},
+			"AWS_REGION": {Value: sprops.Env.Region},
 		},
-		ProjectName: jsii.String("ImageBuilerEntExample"),
+		ProjectName: jsii.String("EKSImageBuildProject"),
 		QueuedTimeout: cdk.Duration_Hours(jsii.Number(1)),
 		Role: role,
 		Source: codebuild.Source_GitHub(&codebuild.GitHubSourceProps{
@@ -57,8 +55,8 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 		Timeout: cdk.Duration_Minutes(jsii.Number(20)),
 	})
 
-	// Create a repository to store image
-	ecr.NewRepository(stack, jsii.String("RepositoryImageBuilder"), &ecr.RepositoryProps{
+	// ビルドしたアプリケーションイメージを格納するリポジトリの作成
+	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{
 			{
@@ -66,7 +64,7 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 			},
 		},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
-		RepositoryName: jsii.String("ent-example"),
+		RepositoryName: jsii.String("eks-app"),
 	})
 
 	return stack

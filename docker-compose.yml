@@ -3,7 +3,7 @@ services:
   mycdk:
     build:
       context: .
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./Dockerfile
     command: /bin/ash
     image: mycdk
     container_name: mycdk

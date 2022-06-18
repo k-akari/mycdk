@@ -3,16 +3,16 @@ package stacks_test
 import (
 	"testing"
 
-	"github.com/k-akari/services/oidc_provider/stacks"
+	"mycdk/stacks"
 
-	"github.com/aws/aws-cdk-go/awscdk/v2"
+	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
-	"github.com/aws/jsii-runtime-go"
+	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func TestOidcProviderStack(t *testing.T) {
-	app := awscdk.NewApp(nil)
-	stack := stacks.NewOidcProviderStack(app, "MyStack", nil)
+func TestGitHubActionsStack(t *testing.T) {
+	app := cdk.NewApp(nil)
+	stack := stacks.NewGitHubActionsStack(app, "MyStack", nil)
 
 	template := assertions.Template_FromStack(stack)
 	template.HasResourceProperties(jsii.String("Custom::AWSCDKOpenIdConnectProvider"), map[string]interface{}{
