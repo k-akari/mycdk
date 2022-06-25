@@ -58,6 +58,6 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 			},
 		},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
-		RepositoryName: jsii.String("eks-app"),
+		RepositoryName: jsii.String("ent-example"),
 	})
 }

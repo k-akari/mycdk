@@ -75,6 +75,6 @@ func TestImageBuilderStack(t *testing.T) {
 	template.HasResourceProperties(jsii.String("AWS::ECR::Repository"), map[string]interface{}{
 		"ImageScanningConfiguration": map[string]interface{}{"ScanOnPush": true},
 		"LifecyclePolicy": map[string]interface{}{"LifecyclePolicyText": assertions.Match_AnyValue()},
-		"RepositoryName": "eks-app",
+		"RepositoryName": "ent-example",
 	})
 }
