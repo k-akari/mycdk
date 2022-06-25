@@ -16,7 +16,7 @@ func NewNetworkStack(scope constructs.Construct, id string, props *cdk.StackProp
 
 	// 3AZにまたがるVPCの作成
 	// AZ毎にパブリックサブネットとNATゲートウェイへルートを向けたプライベートサブネットと完全に独立したプライベートサブネットを1つずつ作成
-	vpc := ec2.NewVpc(stack, jsii.String("VPCEKSCluster"), &ec2.VpcProps{
+	vpc := ec2.NewVpc(stack, jsii.String("VPC"), &ec2.VpcProps{
 		Cidr: jsii.String("10.0.0.0/16"),
 		MaxAzs: jsii.Number(3),
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{

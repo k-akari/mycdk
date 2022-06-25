@@ -13,12 +13,13 @@ func main() {
 	app := cdk.NewApp(nil)
 	props := &cdk.StackProps{Env: env(),}
 
-	// k8s練習用インフラの構築
+	// EKSインフラの構築
 	_, vpc := stacks.NewNetworkStack(app, "EKSNetworkStack", props)
-	_, cluster := stacks.NewEksClusterStack(app, "EksClusterStack", vpc, props)
-	stacks.NewManifestStack(app, "EksManifestStack", cluster, props)
-	stacks.NewImageBuilderStack(app, "EksImageBuilderStack", props)
-	stacks.NewDatabaseClusterStack(app, "EksDatabaseClusterStack", vpc, props)
+	_, sgAlb := stacks.NewLoadBalancerStack(app, "EKSLoadBalancerStack", vpc, props)
+	_, cluster := stacks.NewEksClusterStack(app, "EKSClusterStack", vpc, sgAlb, props)
+	stacks.NewDatabaseClusterStack(app, "EKSDatabaseClusterStack", vpc, cluster, props)
+	stacks.NewManifestStack(app, "EKSManifestStack", cluster, props)
+	stacks.NewImageBuilderStack(app, "EKSImageBuilderStack", props)
 	//
 
 	// GitHubからOIDC認証でAWSへアクセスするための権限設定
