@@ -1,12 +1,13 @@
 package my_eks
 
 import (
+	ecr "github.com/aws/aws-cdk-go/awscdk/v2/awsecr"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	constructs "github.com/aws/constructs-go/constructs/v10"
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewManifest(stack constructs.Construct, cluster eks.Cluster) {
+func NewManifest(stack constructs.Construct, cluster eks.Cluster, repository ecr.Repository) {
 	// マニフェストの適用
 	eks.NewKubernetesManifest(stack, jsii.String("EKSAutoScaler"), &eks.KubernetesManifestProps{
 		Cluster: cluster,
@@ -34,7 +35,7 @@ func NewManifest(stack constructs.Construct, cluster eks.Cluster) {
 							"containers": []map[string]interface{}{
 								{
 									"name": jsii.String("hello-kubernetes"),
-									"image": jsii.String("paulbouwer/hello-kubernetes:1.5"),
+									"image": repository.RepositoryUri(),
 									"ports": []map[string]*float64{
 										{"containerPort": jsii.Number(8080),},
 									},

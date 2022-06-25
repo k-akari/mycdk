@@ -9,7 +9,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
+func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) ecr.Repository {
 	// DockerイメージをビルドしてECRへプッシュするIamRoleを作成
 	role := iam.NewRole(stack, jsii.String("EKSCodeBuildRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("codebuild.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -50,7 +50,7 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 	})
 
 	// ビルドしたアプリケーションイメージを格納するリポジトリの作成
-	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
+	repository := ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{
 			{
@@ -60,4 +60,6 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("ent-example"),
 	})
+
+	return repository
 }

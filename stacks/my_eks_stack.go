@@ -18,8 +18,8 @@ func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps)
 	sgAlb := myeks.NewLoadBalancer(stack, vpc)
 	eksCluster := myeks.NewEksCluster(stack, vpc, sgAlb)
 	myeks.NewDatabaseCluster(stack, vpc, eksCluster)
-	myeks.NewManifest(stack, eksCluster)
-	myeks.NewImageBuilder(stack, &sprops)
+	repository := myeks.NewImageBuilder(stack, &sprops)
+	myeks.NewManifest(stack, eksCluster, repository)
 
 	return stack
 }
