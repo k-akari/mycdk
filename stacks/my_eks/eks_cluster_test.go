@@ -50,8 +50,7 @@ func TestNewEksClusterStack(t *testing.T) {
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("Custom::AWSCDK-EKS-Cluster"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::EKS::Nodegroup"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::SecurityGroupIngress"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::LaunchTemplate"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::EC2::VPCEndpoint"), jsii.Number(1));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("Custom::AWSCDK-EKS-Cluster"), map[string]interface{}{
@@ -82,5 +81,10 @@ func TestNewEksClusterStack(t *testing.T) {
 			"Fn::GetAtt": assertions.Match_AnyValue(),
 		},
 		"ToPort": 80,
+	})
+	template.HasResourceProperties(jsii.String("AWS::EC2::VPCEndpoint"), map[string]interface{}{
+		"ServiceName": "com.amazonaws.ap-northeast-1.ecr.api",
+		"VpcId": map[string]interface{}{"Ref": assertions.Match_StringLikeRegexp(jsii.String("VPC"))},
+		"VpcEndpointType": "Interface",
 	})
 }
