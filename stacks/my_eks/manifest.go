@@ -1,19 +1,12 @@
-package stacks
+package my_eks
 
 import (
-	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	constructs "github.com/aws/constructs-go/constructs/v10"
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewManifestStack(scope constructs.Construct, id string, cluster eks.Cluster, props *cdk.StackProps) cdk.Stack {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewManifest(stack constructs.Construct, cluster eks.Cluster) {
 	// マニフェストの適用
 	eks.NewKubernetesManifest(stack, jsii.String("EKSAutoScaler"), &eks.KubernetesManifestProps{
 		Cluster: cluster,
@@ -53,6 +46,4 @@ func NewManifestStack(scope constructs.Construct, id string, cluster eks.Cluster
 			},
 		},
 	})
-
-	return stack
 }

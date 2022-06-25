@@ -1,10 +1,10 @@
-package stacks_test
+package my_eks_test
 
 import (
 	"os"
 	"testing"
 
-	"mycdk/stacks"
+	myeks "mycdk/stacks/my_eks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -14,11 +14,12 @@ import (
 func TestNewNetworkStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 
-	// テスト対象のスタックとテンプレートを用意
-	testStack, _ := stacks.NewNetworkStack(app, "TestStack", &cdk.StackProps{Env: &cdk.Environment{
+	// テスト対象のスタックテンプレートを用意
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), &cdk.StackProps{Env: &cdk.Environment{
 	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
 	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
 	},})
+	myeks.NewNetwork(testStack)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認

@@ -1,9 +1,9 @@
-package stacks_test
+package my_eks_test
 
 import (
+	myeks "mycdk/stacks/my_eks"
+	"os"
 	"testing"
-
-	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -14,9 +14,12 @@ import (
 func TestNewEksClusterStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 
-	// クロススタック参照のデータを用意
-	refStack := cdk.NewStack(app, jsii.String("ReferenceStack"), nil)
-	vpc := ec2.NewVpc(refStack, jsii.String("VPC"), &ec2.VpcProps{
+	// テスト対象のスタックテンプレートを用意
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), &cdk.StackProps{Env: &cdk.Environment{
+	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	},})
+	vpc := ec2.NewVpc(testStack, jsii.String("VPC"), &ec2.VpcProps{
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
 			{
 				CidrMask: jsii.Number(24),
@@ -35,15 +38,13 @@ func TestNewEksClusterStack(t *testing.T) {
 			},
 		},
 	})
-	sgAlb := ec2.NewSecurityGroup(refStack, jsii.String("SecurityGroupForALB"), &ec2.SecurityGroupProps{
+	sgAlb := ec2.NewSecurityGroup(testStack, jsii.String("SecurityGroupForALB"), &ec2.SecurityGroupProps{
 		Vpc: vpc,
 		AllowAllOutbound: jsii.Bool(true),
 		Description: jsii.String("Security Group for Application Load Balancer"),
 		SecurityGroupName: jsii.String("SecurityGroupForALB"),
 	})
-
-	// テスト対象のスタックとテンプレートを用意
-	testStack, _ := stacks.NewEksClusterStack(app, "TestStack", vpc, sgAlb, nil)
+	myeks.NewEksCluster(testStack, vpc, sgAlb)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
@@ -78,7 +79,7 @@ func TestNewEksClusterStack(t *testing.T) {
 		"IpProtocol": "tcp",
 		"FromPort": 80,
 		"SourceSecurityGroupId": map[string]interface{}{
-			"Fn::ImportValue": assertions.Match_AnyValue(),
+			"Fn::GetAtt": assertions.Match_AnyValue(),
 		},
 		"ToPort": 80,
 	})

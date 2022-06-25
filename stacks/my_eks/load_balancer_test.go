@@ -1,9 +1,9 @@
-package stacks_test
+package my_eks_test
 
 import (
+	myeks "mycdk/stacks/my_eks"
+	"os"
 	"testing"
-
-	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -14,9 +14,12 @@ import (
 func TestNewLoadBalancerStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 
-	// クロススタック参照のデータを用意
-	refStack := cdk.NewStack(app, jsii.String("ReferenceStack"), nil)
-	vpc := ec2.NewVpc(refStack, jsii.String("VPC"), &ec2.VpcProps{
+	// テスト対象のスタックテンプレートを用意
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), &cdk.StackProps{Env: &cdk.Environment{
+	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	},})
+	vpc := ec2.NewVpc(testStack, jsii.String("VPC"), &ec2.VpcProps{
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
 			{
 				CidrMask: jsii.Number(24),
@@ -35,9 +38,7 @@ func TestNewLoadBalancerStack(t *testing.T) {
 			},
 		},
 	})
-
-	// テスト対象のスタックとテンプレートを用意
-	testStack, _ := stacks.NewLoadBalancerStack(app, "TestStack", vpc, nil)
+	myeks.NewLoadBalancer(testStack, vpc)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
@@ -65,7 +66,7 @@ func TestNewLoadBalancerStack(t *testing.T) {
 			},
 		},
 		"VpcId": map[string]interface{}{
-			"Fn::ImportValue": assertions.Match_AnyValue(),
+			"Ref": assertions.Match_AnyValue(),
 		},
 	})
 	template.HasResourceProperties(jsii.String("AWS::ElasticLoadBalancingV2::LoadBalancer"), map[string]interface{}{

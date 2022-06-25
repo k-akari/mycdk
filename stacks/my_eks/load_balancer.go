@@ -1,4 +1,4 @@
-package stacks
+package my_eks
 
 import (
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
@@ -8,13 +8,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewLoadBalancerStack(scope constructs.Construct, id string, vpc ec2.Vpc, props *cdk.StackProps) (cdk.Stack, ec2.SecurityGroup) {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewLoadBalancer(stack constructs.Construct, vpc ec2.Vpc) ec2.SecurityGroup {
 	// ALBのセキュリティグループの作成
 	sg := ec2.NewSecurityGroup(stack, jsii.String("SecurityGroup"), &ec2.SecurityGroupProps{
 		Vpc: vpc,
@@ -39,5 +33,5 @@ func NewLoadBalancerStack(scope constructs.Construct, id string, vpc ec2.Vpc, pr
 		SecurityGroup: sg,
 	})
 
-	return stack, sg
+	return sg
 }

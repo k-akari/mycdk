@@ -1,4 +1,4 @@
-package stacks
+package my_eks
 
 import (
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
@@ -9,13 +9,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.StackProps) cdk.Stack {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 	// DockerイメージをビルドしてECRへプッシュするIamRoleを作成
 	role := iam.NewRole(stack, jsii.String("EKSCodeBuildRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("codebuild.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -36,8 +30,8 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 			Privileged: jsii.Bool(true),
 		},
 		EnvironmentVariables: &map[string]*codebuild.BuildEnvironmentVariable{
-			"AWS_ACCOUNT": {Value: sprops.Env.Account},
-			"AWS_REGION": {Value: sprops.Env.Region},
+			"AWS_ACCOUNT": {Value: props.Env.Account},
+			"AWS_REGION": {Value: props.Env.Region},
 		},
 		ProjectName: jsii.String("EKSImageBuildProject"),
 		QueuedTimeout: cdk.Duration_Hours(jsii.Number(1)),
@@ -66,6 +60,4 @@ func NewImageBuilderStack(scope constructs.Construct, id string, props *cdk.Stac
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-app"),
 	})
-
-	return stack
 }

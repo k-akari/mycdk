@@ -1,7 +1,6 @@
-package stacks
+package my_eks
 
 import (
-	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	ec2 "github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	iam "github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
@@ -9,13 +8,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewEksClusterStack(scope constructs.Construct, id string, vpc ec2.Vpc, sgAlb ec2.SecurityGroup, props *cdk.StackProps) (cdk.Stack, eks.Cluster) {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc, sgAlb ec2.SecurityGroup) eks.Cluster {
 	// EKSコントロールプレーンに付与するIAMロールの作成
 	masterRole := iam.NewRole(stack, jsii.String("EKSMasterRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("eks.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -118,5 +111,5 @@ func NewEksClusterStack(scope constructs.Construct, id string, vpc ec2.Vpc, sgAl
 		},
 	})
 
-	return stack, cluster
+	return cluster
 }

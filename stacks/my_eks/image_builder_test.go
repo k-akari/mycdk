@@ -1,10 +1,9 @@
-package stacks_test
+package my_eks_test
 
 import (
+	myeks "mycdk/stacks/my_eks"
 	"os"
 	"testing"
-
-	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -13,19 +12,22 @@ import (
 
 func TestImageBuilderStack(t *testing.T) {
 	app := cdk.NewApp(nil)
-	stack := stacks.NewImageBuilderStack(app, "MyStack", &cdk.StackProps{
-		Env: &cdk.Environment{
-	 		Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
-	 		Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
-		},
-	})
+	
+	// テスト対象のスタックテンプレートを用意
+	props := &cdk.StackProps{Env: &cdk.Environment{
+	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	},}
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), props)
+	myeks.NewImageBuilder(testStack, props)
+	template := assertions.Template_FromStack(testStack)
 
-	template := assertions.Template_FromStack(stack)
-
+	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::IAM::Role"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::CodeBuild::Project"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::ECR::Repository"), jsii.Number(1));
 
+	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::IAM::Role"), map[string]interface{}{
 		"AssumeRolePolicyDocument": map[string]interface{}{
 			"Statement": []map[string]interface{}{

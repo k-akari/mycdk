@@ -1,4 +1,4 @@
-package stacks
+package my_eks
 
 import (
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
@@ -9,13 +9,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewDatabaseClusterStack(scope constructs.Construct, id string, vpc ec2.Vpc, eksCluster eks.Cluster, props *cdk.StackProps) cdk.Stack {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewDatabaseCluster(stack constructs.Construct, vpc ec2.Vpc, eksCluster eks.Cluster) {
 	// DBクラスターの作成
 	dbCluster := rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
 		Engine: rds.DatabaseClusterEngine_AuroraPostgres(&rds.AuroraPostgresClusterEngineProps{
@@ -49,6 +43,4 @@ func NewDatabaseClusterStack(scope constructs.Construct, id string, vpc ec2.Vpc,
 			jsii.Bool(true),
 		)
 	}
-
-	return stack
 }

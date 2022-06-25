@@ -1,19 +1,12 @@
-package stacks
+package my_eks
 
 import (
-	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	ec2 "github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	constructs "github.com/aws/constructs-go/constructs/v10"
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewNetworkStack(scope constructs.Construct, id string, props *cdk.StackProps) (cdk.Stack, ec2.Vpc) {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewNetwork(stack constructs.Construct) ec2.Vpc {
 	// 3AZにまたがるVPCの作成
 	// AZ毎にパブリックサブネットとNATゲートウェイへルートを向けたプライベートサブネットと完全に独立したプライベートサブネットを1つずつ作成
 	vpc := ec2.NewVpc(stack, jsii.String("VPC"), &ec2.VpcProps{
@@ -39,5 +32,5 @@ func NewNetworkStack(scope constructs.Construct, id string, props *cdk.StackProp
 		VpcName: jsii.String("vpc-for-eks-cluster"),
 	})
 
-	return stack, vpc
+	return vpc
 }

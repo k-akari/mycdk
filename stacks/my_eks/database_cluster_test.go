@@ -1,9 +1,9 @@
-package stacks_test
+package my_eks_test
 
 import (
+	myeks "mycdk/stacks/my_eks"
+	"os"
 	"testing"
-
-	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -12,12 +12,15 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func TestNewDatabaseClusterStack(t *testing.T) {
+func TestNewDatabaseCluster(t *testing.T) {
 	app := cdk.NewApp(nil)
 
-	// クロススタック参照のデータを用意
-	refStack := cdk.NewStack(app, jsii.String("ReferenceStack"), nil)
-	vpc := ec2.NewVpc(refStack, jsii.String("VPC"), &ec2.VpcProps{
+	// テスト対象のスタックテンプレートを用意
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), &cdk.StackProps{Env: &cdk.Environment{
+	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	},})
+	vpc := ec2.NewVpc(testStack, jsii.String("VPC"), &ec2.VpcProps{
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
 			{
 				CidrMask: jsii.Number(24),
@@ -36,19 +39,17 @@ func TestNewDatabaseClusterStack(t *testing.T) {
 			},
 		},
 	})
-	cluster := eks.NewCluster(refStack, jsii.String("EKSCluster"), &eks.ClusterProps{
+	cluster := eks.NewCluster(testStack, jsii.String("EKSCluster"), &eks.ClusterProps{
 		Version: eks.KubernetesVersion_V1_21(),
 		Vpc: vpc,
 	})
-
-	// テスト対象のスタックとテンプレートを用意
-	testStack := stacks.NewDatabaseClusterStack(app, "TestStack", vpc, cluster, nil)
+	myeks.NewDatabaseCluster(testStack, vpc, cluster)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::RDS::DBCluster"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::RDS::DBInstance"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::SecurityGroup"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::EC2::SecurityGroup"), jsii.Number(2)); // テスト用に作成したsgAlbも含まれるため
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::RDS::DBCluster"), map[string]interface{}{
@@ -76,11 +77,11 @@ func TestNewDatabaseClusterStack(t *testing.T) {
 				"FromPort": 80,
 				"ToPort": 80,
 				"IpProtocol": "tcp",
-				"SourceSecurityGroupId": map[string]interface{}{"Fn::ImportValue": assertions.Match_AnyValue()},
+				"SourceSecurityGroupId": assertions.Match_AnyValue(),
 			},
 		},
 		"VpcId": map[string]interface{}{
-			"Fn::ImportValue": assertions.Match_AnyValue(),
+			"Ref": assertions.Match_AnyValue(),
 		},
 	})
 }
