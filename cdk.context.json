@@ -3,5 +3,103 @@
     "ap-northeast-1a",
     "ap-northeast-1c",
     "ap-northeast-1d"
-  ]
+  ],
+  "load-balancer:account=575428171781:loadBalancerTags.0.key=ingress.k8s.aws/stack:loadBalancerTags.0.value=default/front-ingress:loadBalancerType=application:region=ap-northeast-1": {
+    "loadBalancerArn": "arn:aws:elasticloadbalancing:ap-northeast-1:575428171781:loadbalancer/app/k8s-default-fronting-ca6387fd03/591ec70861ee7ea5",
+    "loadBalancerCanonicalHostedZoneId": "Z14GRHDCWA56QT",
+    "loadBalancerDnsName": "k8s-default-fronting-ca6387fd03-135465406.ap-northeast-1.elb.amazonaws.com",
+    "vpcId": "vpc-08ebb01061ebe7363",
+    "securityGroupIds": [
+      "sg-0c7404067f6d08aec",
+      "sg-0b86e9aaa164aae35"
+    ],
+    "ipAddressType": "ipv4"
+  },
+  "vpc-provider:account=575428171781:filter.vpc-id=vpc-08ebb01061ebe7363:region=ap-northeast-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-08ebb01061ebe7363",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "subnet-for-eks-cluster-private-isolated",
+        "type": "Isolated",
+        "subnets": [
+          {
+            "subnetId": "subnet-0624a51654023d042",
+            "cidr": "10.0.6.0/24",
+            "availabilityZone": "ap-northeast-1a",
+            "routeTableId": "rtb-087390c9d7c941123"
+          },
+          {
+            "subnetId": "subnet-0e5ae921cfb7bfd87",
+            "cidr": "10.0.7.0/24",
+            "availabilityZone": "ap-northeast-1c",
+            "routeTableId": "rtb-06303757786af675b"
+          },
+          {
+            "subnetId": "subnet-08c0e3bff2fea8d13",
+            "cidr": "10.0.8.0/24",
+            "availabilityZone": "ap-northeast-1d",
+            "routeTableId": "rtb-0abe70ac8a50ac136"
+          }
+        ]
+      },
+      {
+        "name": "subnet-for-eks-cluster-public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-0d2790238df3fea10",
+            "cidr": "10.0.0.0/24",
+            "availabilityZone": "ap-northeast-1a",
+            "routeTableId": "rtb-0620929eb2a41c4c7"
+          },
+          {
+            "subnetId": "subnet-0009fe3445d587fcb",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "ap-northeast-1c",
+            "routeTableId": "rtb-032e3a94ee28e7325"
+          },
+          {
+            "subnetId": "subnet-09508d665147db896",
+            "cidr": "10.0.2.0/24",
+            "availabilityZone": "ap-northeast-1d",
+            "routeTableId": "rtb-0a02fee100eb836b8"
+          }
+        ]
+      },
+      {
+        "name": "subnet-for-eks-cluster-private-with-nat",
+        "type": "Private",
+        "subnets": [
+          {
+            "subnetId": "subnet-0220348327aad08de",
+            "cidr": "10.0.3.0/24",
+            "availabilityZone": "ap-northeast-1a",
+            "routeTableId": "rtb-04f65183a940e57c2"
+          },
+          {
+            "subnetId": "subnet-0d2b7e8d5ba7ab6d0",
+            "cidr": "10.0.4.0/24",
+            "availabilityZone": "ap-northeast-1c",
+            "routeTableId": "rtb-051e10d0a88d2326a"
+          },
+          {
+            "subnetId": "subnet-083fa5eca8be0927c",
+            "cidr": "10.0.5.0/24",
+            "availabilityZone": "ap-northeast-1d",
+            "routeTableId": "rtb-0956e7bd16b88d250"
+          }
+        ]
+      }
+    ]
+  },
+  "security-group:account=575428171781:region=ap-northeast-1:securityGroupId=sg-0c7404067f6d08aec": {
+    "securityGroupId": "sg-0c7404067f6d08aec",
+    "allowAllOutbound": false
+  },
+  "security-group:account=575428171781:region=ap-northeast-1:securityGroupId=sg-0b86e9aaa164aae35": {
+    "securityGroupId": "sg-0b86e9aaa164aae35",
+    "allowAllOutbound": false
+  }
 }
