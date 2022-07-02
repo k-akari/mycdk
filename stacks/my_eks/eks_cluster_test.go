@@ -38,13 +38,7 @@ func TestNewEksClusterStack(t *testing.T) {
 			},
 		},
 	})
-	sgAlb := ec2.NewSecurityGroup(testStack, jsii.String("SecurityGroupForALB"), &ec2.SecurityGroupProps{
-		Vpc: vpc,
-		AllowAllOutbound: jsii.Bool(true),
-		Description: jsii.String("Security Group for Application Load Balancer"),
-		SecurityGroupName: jsii.String("SecurityGroupForALB"),
-	})
-	myeks.NewEksCluster(testStack, vpc, sgAlb)
+	myeks.NewEksCluster(testStack, vpc)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
@@ -56,7 +50,7 @@ func TestNewEksClusterStack(t *testing.T) {
 	template.HasResourceProperties(jsii.String("Custom::AWSCDK-EKS-Cluster"), map[string]interface{}{
 		"Config": map[string]interface{}{
 			"name": "eks-cluster",
-			"version": "1.21",
+			"version": "1.22",
 			"resourcesVpcConfig": map[string]bool{
 				"endpointPublicAccess": true,
 				"endpointPrivateAccess": false,
@@ -73,14 +67,6 @@ func TestNewEksClusterStack(t *testing.T) {
 		"NodegroupName": "eks-node-group",
 		"ScalingConfig": map[string]float64{"DesiredSize": 3, "MaxSize": 6, "MinSize": 3,},
 		"Tags": map[string]string{"Environment": "production", "Service": "service_name"},
-	})
-	template.HasResourceProperties(jsii.String("AWS::EC2::SecurityGroupIngress"), map[string]interface{}{
-		"IpProtocol": "tcp",
-		"FromPort": 80,
-		"SourceSecurityGroupId": map[string]interface{}{
-			"Fn::GetAtt": assertions.Match_AnyValue(),
-		},
-		"ToPort": 80,
 	})
 	template.HasResourceProperties(jsii.String("AWS::EC2::VPCEndpoint"), map[string]interface{}{
 		"ServiceName": "com.amazonaws.ap-northeast-1.ecr.api",

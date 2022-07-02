@@ -8,7 +8,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc, sgAlb ec2.SecurityGroup) eks.Cluster {
+func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 	// EKSコントロールプレーンに付与するIAMロールの作成
 	masterRole := iam.NewRole(stack, jsii.String("EKSMasterRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("eks.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -22,21 +22,16 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc, sgAlb ec2.SecurityGr
 
 	// EKSクラスターの作成
 	cluster := eks.NewCluster(stack, jsii.String("EKSCluster"), &eks.ClusterProps{
+		AlbController: &eks.AlbControllerOptions{
+			Version: eks.AlbControllerVersion_V2_4_1(),
+		},
 		ClusterName: jsii.String("eks-cluster"),
 		DefaultCapacity: jsii.Number(0), // デフォルトインスタンスは作らない
 		EndpointAccess: eks.EndpointAccess_PUBLIC(),
 		MastersRole: masterRole, // クラスターのマスターロール
-		Version: eks.KubernetesVersion_V1_21(), // kubernetesのバージョン
+		Version: eks.KubernetesVersion_Of(jsii.String("1.22")), // kubernetesのバージョン
 		Vpc: vpc, // EKSクラスターをデプロイするVPC
 	})
-
-	// ALBからEKSクラスターへのIngress Accessを許可する
-	cluster.ClusterSecurityGroup().AddIngressRule(
-		ec2.Peer_SecurityGroupId(sgAlb.SecurityGroupId(), jsii.String("")),
-		ec2.Port_Tcp(jsii.Number(80)),
-		jsii.String("Allow access from ALB"),
-		jsii.Bool(true),
-	)
 
 	// Nodeに付与するIAMロールの作成
 	nodeRole := iam.NewRole(stack, jsii.String("EKSNodeRole"), &iam.RoleProps{
