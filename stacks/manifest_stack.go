@@ -13,7 +13,8 @@ import (
 func NewManifestStack(scope constructs.Construct, id string, cluster eks.Cluster, repos myeks.Repositories, props *cdk.StackProps) cdk.Stack {
 	stack := cdk.NewStack(scope, &id, props)
 
-	ingressName := manifest.NewManifest(stack, cluster, repos)
+	ingressName := manifest.NewMainManifest(stack, cluster, repos)
+	manifest.NewCronJobManifest(stack, cluster)
 	manifest.NewDNS(stack, ingressName)
 
 	return stack

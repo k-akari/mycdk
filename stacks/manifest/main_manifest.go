@@ -9,7 +9,7 @@ import (
 	constructs "github.com/aws/constructs-go/constructs/v10"
 )
 
-func NewManifest(stack constructs.Construct, cluster eks.Cluster, repos myeks.Repositories) *string {
+func NewMainManifest(stack constructs.Construct, cluster eks.Cluster, repos myeks.Repositories) *string {
 	label := map[string]*string{"app": jsii.String("front"),}
 
 	deployment := map[string]interface{}{
@@ -107,7 +107,7 @@ func NewManifest(stack constructs.Construct, cluster eks.Cluster, repos myeks.Re
 	}
 
 	// マニフェストの適用
-	eks.NewKubernetesManifest(stack, jsii.String("Manifest"), &eks.KubernetesManifestProps{
+	eks.NewKubernetesManifest(stack, jsii.String("MainManifest"), &eks.KubernetesManifestProps{
 		Cluster: cluster,
 		Manifest: &[]*map[string]interface{}{
 			&deployment,
