@@ -24,11 +24,11 @@ func TestNewNetworkStack(t *testing.T) {
 
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::EC2::VPC"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::Subnet"), jsii.Number(9));
-	template.ResourceCountIs(jsii.String("AWS::EC2::RouteTable"), jsii.Number(9));
-	template.ResourceCountIs(jsii.String("AWS::EC2::SubnetRouteTableAssociation"), jsii.Number(9));
-	template.ResourceCountIs(jsii.String("AWS::EC2::NatGateway"), jsii.Number(3));
-	template.ResourceCountIs(jsii.String("AWS::EC2::EIP"), jsii.Number(3));
+	template.ResourceCountIs(jsii.String("AWS::EC2::Subnet"), jsii.Number(6));
+	template.ResourceCountIs(jsii.String("AWS::EC2::RouteTable"), jsii.Number(6));
+	template.ResourceCountIs(jsii.String("AWS::EC2::SubnetRouteTableAssociation"), jsii.Number(6));
+	template.ResourceCountIs(jsii.String("AWS::EC2::NatGateway"), jsii.Number(2));
+	template.ResourceCountIs(jsii.String("AWS::EC2::EIP"), jsii.Number(2));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::EC2::VPC"), map[string]interface{}{

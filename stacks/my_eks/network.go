@@ -11,7 +11,7 @@ func NewNetwork(stack constructs.Construct) ec2.Vpc {
 	// AZ毎にパブリックサブネットとNATゲートウェイへルートを向けたプライベートサブネットと完全に独立したプライベートサブネットを1つずつ作成
 	vpc := ec2.NewVpc(stack, jsii.String("VPC"), &ec2.VpcProps{
 		Cidr: jsii.String("10.0.0.0/16"),
-		MaxAzs: jsii.Number(3),
+		MaxAzs: jsii.Number(2),
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
 			{
 				CidrMask: jsii.Number(24),
