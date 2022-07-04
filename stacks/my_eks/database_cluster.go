@@ -15,6 +15,11 @@ func NewDatabaseCluster(stack constructs.Construct, vpc ec2.Vpc, eksCluster eks.
 		Engine: rds.DatabaseClusterEngine_AuroraPostgres(&rds.AuroraPostgresClusterEngineProps{
 			Version: rds.AuroraPostgresEngineVersion_VER_13_6(),
 		}),
+		ClusterIdentifier: jsii.String("cluster-identifier"),
+		InstanceIdentifierBase: jsii.String("db-instance-identifier"),
+		Credentials: rds.Credentials_FromGeneratedSecret(jsii.String("postgres"), &rds.CredentialsBaseOptions{
+			SecretName: jsii.String("database-secrets"),
+		}),
 		InstanceProps: &rds.InstanceProps{
 			Vpc: vpc,
 			VpcSubnets: &ec2.SubnetSelection{

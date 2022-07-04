@@ -49,6 +49,8 @@ func TestNewDatabaseCluster(t *testing.T) {
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::RDS::DBCluster"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::RDS::DBInstance"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::SecretsManager::Secret"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::SecretsManager::SecretTargetAttachment"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::EC2::SecurityGroup"), jsii.Number(2)); // テスト用に作成したsgAlbも含まれるため
 
 	// 作成されるリソースのプロパティを確認
@@ -56,6 +58,7 @@ func TestNewDatabaseCluster(t *testing.T) {
 		"Engine": "aurora-postgresql",
 		"CopyTagsToSnapshot": true,
 		"DatabaseName": "EksDatabaseName",
+		"DBClusterIdentifier": "cluster-identifier",
 		"DeletionProtection": false,
 		"EngineVersion": "13.6",
 		"Port": 5432,
@@ -64,11 +67,18 @@ func TestNewDatabaseCluster(t *testing.T) {
 		"DBInstanceClass": "db.t3.medium",
 		"AllowMajorVersionUpgrade": false,
 		"AutoMinorVersionUpgrade": true,
+		"DBClusterIdentifier": map[string]interface{}{
+			"Ref": assertions.Match_StringLikeRegexp(jsii.String("DatabaseCluster")),
+		},
+		"DBInstanceIdentifier": assertions.Match_StringLikeRegexp(jsii.String("db-instance-identifier")),
 		"DeleteAutomatedBackups": false,
 		"EnablePerformanceInsights": false,
 		"Engine": "aurora-postgresql",
 		"EngineVersion": "13.6",
 		"PubliclyAccessible": false,
+	})
+	template.HasResourceProperties(jsii.String("AWS::SecretsManager::Secret"), map[string]interface{}{
+		"Name": "database-secrets",
 	})
 	template.HasResourceProperties(jsii.String("AWS::EC2::SecurityGroup"), map[string]interface{}{
 		"SecurityGroupIngress": []map[string]interface{}{
