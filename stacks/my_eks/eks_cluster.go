@@ -62,12 +62,12 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 		CapacityType: eks.CapacityType_SPOT,
 		DesiredSize: jsii.Number(3),
 		InstanceTypes: &[]ec2.InstanceType{
-			ec2.NewInstanceType(jsii.String("t2.micro")),
-			ec2.NewInstanceType(jsii.String("t2.small")),
-			ec2.NewInstanceType(jsii.String("t2.medium")),
-			ec2.NewInstanceType(jsii.String("t3.micro")),
-			ec2.NewInstanceType(jsii.String("t3.small")),
-			ec2.NewInstanceType(jsii.String("t3.medium")),
+			ec2.NewInstanceType(jsii.String("m5a.large")),
+			ec2.NewInstanceType(jsii.String("m5.large")),
+			ec2.NewInstanceType(jsii.String("m5ad.large")),
+			ec2.NewInstanceType(jsii.String("m5d.large")),
+			ec2.NewInstanceType(jsii.String("m5a.xlarge")),
+			ec2.NewInstanceType(jsii.String("m5.xlarge")),
 		},
 		Labels: &map[string]*string {
 			"app": jsii.String("practice"),
