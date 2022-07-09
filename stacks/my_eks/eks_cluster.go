@@ -66,8 +66,8 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 			ec2.NewInstanceType(jsii.String("m5.large")),
 			ec2.NewInstanceType(jsii.String("m5ad.large")),
 			ec2.NewInstanceType(jsii.String("m5d.large")),
-			ec2.NewInstanceType(jsii.String("m5a.xlarge")),
-			ec2.NewInstanceType(jsii.String("m5.xlarge")),
+			ec2.NewInstanceType(jsii.String("m5n.large")),
+			ec2.NewInstanceType(jsii.String("m5dn.large")),
 		},
 		Labels: &map[string]*string {
 			"app": jsii.String("practice"),
