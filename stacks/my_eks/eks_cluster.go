@@ -60,7 +60,7 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 	cluster.AddNodegroupCapacity(jsii.String("EKSNodeGroup"), &eks.NodegroupOptions{
 		AmiType: eks.NodegroupAmiType_AL2_X86_64,
 		CapacityType: eks.CapacityType_SPOT,
-		DesiredSize: jsii.Number(3),
+		DesiredSize: jsii.Number(2),
 		InstanceTypes: &[]ec2.InstanceType{
 			ec2.NewInstanceType(jsii.String("m5a.large")),
 			ec2.NewInstanceType(jsii.String("m5.large")),
@@ -77,7 +77,7 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 			Version: launchTemplate.LatestVersionNumber(),
 		},
 		MaxSize: jsii.Number(6),
-		MinSize: jsii.Number(3),
+		MinSize: jsii.Number(2),
 		NodegroupName: jsii.String("eks-node-group"),
 		NodeRole: nodeRole,
 		Subnets: &ec2.SubnetSelection{
