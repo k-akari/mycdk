@@ -1,6 +1,9 @@
 package my_eks
 
 import (
+	"fmt"
+
+	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	ec2 "github.com/aws/aws-cdk-go/awscdk/v2/awsec2"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	iam "github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
@@ -131,6 +134,41 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 		},
 		SecurityGroups: &[]ec2.ISecurityGroup{sgVpcEndpoint,},
 	})
+
+	// Secrets ManagerからSecretリソース作成するPodに付与するIAMロールの作成
+	stringEquals := cdk.NewCfnJson(stack, jsii.String("ConditionJson"), &cdk.CfnJsonProps{
+		Value: map[string]string{
+			*cluster.ClusterOpenIdConnectIssuer()+":sub": fmt.Sprintf("system:serviceaccount:%s:account-to-access-secrets", stack.Node().TryGetContext(jsii.String("namespace"))),
+		},
+	})
+
+	federatedPrincipal := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
+		"StringEquals": stringEquals,
+	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
+
+	secretAccessPolicy := iam.NewManagedPolicy(stack, jsii.String("SecretsManagerAccessPolicy"), &iam.ManagedPolicyProps{
+		ManagedPolicyName: jsii.String("secrets-access-policy"),
+		Document: iam.NewPolicyDocument(&iam.PolicyDocumentProps{
+    		Statements: &[]iam.PolicyStatement{
+          		iam.NewPolicyStatement(&iam.PolicyStatementProps{
+    			    Effect: iam.Effect_ALLOW,
+    			    Resources: &[]*string{jsii.String("*")},
+    			    Actions: &[]*string{
+    			    	jsii.String("secretsmanager:GetResourcePolicy"),
+						jsii.String("secretsmanager:GetSecretValue"),
+						jsii.String("secretsmanager:DescribeSecret"),
+						jsii.String("secretsmanager:ListSecretVersionIds"),
+					},
+				}),
+			},
+      	}),
+	})
+	
+	iam.NewRole(stack, jsii.String("CreateSecretFromSecretsManagerRole"), &iam.RoleProps{
+      	AssumedBy: federatedPrincipal,
+      	RoleName: jsii.String("create-secret-from-secrets-manager-role"),
+		ManagedPolicies: &[]iam.IManagedPolicy{secretAccessPolicy,},
+    })
 
 	return cluster
 }
