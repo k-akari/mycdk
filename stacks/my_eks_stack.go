@@ -13,6 +13,7 @@ func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps)
 
 	vpc := myeks.NewNetwork(stack)
 	eksCluster := myeks.NewEksCluster(stack, vpc)
+	myeks.NewIamRolesForServiceAccounts(stack, eksCluster)
 	myeks.NewDatabaseCluster(stack, vpc, eksCluster)
 	repos := myeks.NewImageBuilder(stack, props)
 
