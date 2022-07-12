@@ -26,6 +26,7 @@
       "aws",
       "aws-cn"
     ],
-    "namespace": "main"
+    "namespace": "main",
+    "ingressName": "front-ingress"
   }
 }

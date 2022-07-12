@@ -14,8 +14,8 @@ func main() {
 	props := &cdk.StackProps{Env: env(),}
 
 	// EKSインフラの構築
-	_, cluster, repos := stacks.NewMyEKSStack(app, "MyEKSStack", props)
-	stacks.NewManifestStack(app, "ManifestStack", cluster, repos, props)
+	stacks.NewMyEKSStack(app, "MyEKSStack", props)
+	stacks.NewDNSStack(app, "DNSStack", props)
 	//
 
 	// GitHubからOIDC認証でAWSへアクセスするための権限設定

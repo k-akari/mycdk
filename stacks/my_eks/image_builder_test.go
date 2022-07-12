@@ -25,7 +25,7 @@ func TestImageBuilderStack(t *testing.T) {
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::IAM::Role"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::CodeBuild::Project"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::ECR::Repository"), jsii.Number(2));
+	template.ResourceCountIs(jsii.String("AWS::ECR::Repository"), jsii.Number(3));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::IAM::Role"), map[string]interface{}{
@@ -76,6 +76,11 @@ func TestImageBuilderStack(t *testing.T) {
 		"ImageScanningConfiguration": map[string]interface{}{"ScanOnPush": true},
 		"LifecyclePolicy": map[string]interface{}{"LifecyclePolicyText": assertions.Match_AnyValue()},
 		"RepositoryName": "eks-app",
+	})
+	template.HasResourceProperties(jsii.String("AWS::ECR::Repository"), map[string]interface{}{
+		"ImageScanningConfiguration": map[string]interface{}{"ScanOnPush": true},
+		"LifecyclePolicy": map[string]interface{}{"LifecyclePolicyText": assertions.Match_AnyValue()},
+		"RepositoryName": "eks-migration",
 	})
 	template.HasResourceProperties(jsii.String("AWS::ECR::Repository"), map[string]interface{}{
 		"ImageScanningConfiguration": map[string]interface{}{"ScanOnPush": true},

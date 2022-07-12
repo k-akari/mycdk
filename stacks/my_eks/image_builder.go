@@ -9,12 +9,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-type Repositories struct {
-	App ecr.Repository
-	Web ecr.Repository
-}
-
-func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) Repositories {
+func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 	// DockerイメージをビルドしてECRへプッシュするIamRoleを作成
 	role := iam.NewRole(stack, jsii.String("EKSCodeBuildRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("codebuild.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -55,7 +50,7 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) Reposito
 	})
 
 	// ビルドしたアプリケーションイメージを格納するリポジトリの作成
-	repoApp := ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
+	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{
 			{
@@ -65,8 +60,17 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) Reposito
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-app"),
 	})
-
-	repoWeb := ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
+	ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
+		ImageScanOnPush: jsii.Bool(true),
+		LifecycleRules: &[]*ecr.LifecycleRule{
+			{
+				MaxImageCount: jsii.Number(1),
+			},
+		},
+		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
+		RepositoryName: jsii.String("eks-migration"),
+	})
+	ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{
 			{
@@ -76,11 +80,4 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) Reposito
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-web"),
 	})
-
-	repos := Repositories{
-		App: repoApp,
-		Web: repoWeb,
-	}
-
-	return repos
 }

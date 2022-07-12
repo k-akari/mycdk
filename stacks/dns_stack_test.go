@@ -1,7 +1,7 @@
-package manifest_test
+package stacks_test
 
 import (
-	"mycdk/stacks/manifest"
+	"mycdk/stacks"
 	"os"
 	"testing"
 
@@ -10,15 +10,14 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func TestNewDatabaseCluster(t *testing.T) {
+func TestNewDNSStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 
 	// テスト対象のスタックテンプレートを用意
-	testStack := cdk.NewStack(app, jsii.String("TestStack"), &cdk.StackProps{Env: &cdk.Environment{
+	testStack := stacks.NewDNSStack(app, "TestStack", &cdk.StackProps{Env: &cdk.Environment{
 	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
 	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
 	},})
-	manifest.NewDNS(testStack, jsii.String("ingressName"))
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認

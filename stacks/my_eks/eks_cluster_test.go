@@ -62,10 +62,10 @@ func TestNewEksClusterStack(t *testing.T) {
 		"AmiType": "AL2_x86_64",
 		"CapacityType": "SPOT",
 		"ForceUpdateEnabled": true,
-		"InstanceTypes": []string{"t2.micro", "t2.small", "t2.medium", "t3.micro", "t3.small", "t3.medium"},
+		"InstanceTypes": []string{"m5a.large", "m5.large", "m5ad.large", "m5d.large", "m5n.large", "m5dn.large"},
 		"Labels": map[string]string{"app": "practice"},
 		"NodegroupName": "eks-node-group",
-		"ScalingConfig": map[string]float64{"DesiredSize": 3, "MaxSize": 6, "MinSize": 3,},
+		"ScalingConfig": map[string]float64{"DesiredSize": 2, "MaxSize": 6, "MinSize": 2,},
 		"Tags": map[string]string{"Environment": "production", "Service": "service_name"},
 	})
 	template.HasResourceProperties(jsii.String("AWS::EC2::VPCEndpoint"), map[string]interface{}{

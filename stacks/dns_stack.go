@@ -1,4 +1,4 @@
-package manifest
+package stacks
 
 import (
 	"fmt"
@@ -12,7 +12,9 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewDNS(stack constructs.Construct, ingressName *string) {
+func NewDNSStack(scope constructs.Construct, id string, props *cdk.StackProps) cdk.Stack {
+	stack := cdk.NewStack(scope, &id, props)
+
 	hostedZone := route53.NewPublicHostedZone(stack, jsii.String("PublicHostedZone"), &route53.PublicHostedZoneProps{
 		ZoneName: jsii.String(os.Getenv("DOMAIN")),
 		Comment: jsii.String("free sample domain"),
@@ -21,7 +23,7 @@ func NewDNS(stack constructs.Construct, ingressName *string) {
 
 	alb := elbv2.ApplicationLoadBalancer_FromLookup(stack, jsii.String("ApplicationLoadBalancer"), &elbv2.ApplicationLoadBalancerLookupOptions{
 		LoadBalancerTags: &map[string]*string{
-			"ingress.k8s.aws/stack": jsii.String(fmt.Sprintf("default/%s", *ingressName)),
+			"ingress.k8s.aws/stack": jsii.String(fmt.Sprintf("default/%s", stack.Node().TryGetContext(jsii.String("ingressName")))),
 		},
 	})
 
@@ -30,4 +32,6 @@ func NewDNS(stack constructs.Construct, ingressName *string) {
 		Ttl: cdk.Duration_Seconds(jsii.Number(300)),
 		Target: route53.RecordTarget_FromAlias(targets.NewLoadBalancerTarget(alb)),
 	})
+
+	return stack
 }
