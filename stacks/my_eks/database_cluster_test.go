@@ -43,7 +43,7 @@ func TestNewDatabaseCluster(t *testing.T) {
 		Version: eks.KubernetesVersion_V1_21(),
 		Vpc: vpc,
 	})
-	myeks.NewDatabaseCluster(testStack, vpc, cluster)
+	myeks.NewDatabaseCluster(testStack, cluster)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
@@ -84,8 +84,8 @@ func TestNewDatabaseCluster(t *testing.T) {
 		"SecurityGroupIngress": []map[string]interface{}{
 			{
 				"Description": assertions.Match_AnyValue(),
-				"FromPort": 80,
-				"ToPort": 80,
+				"FromPort": 5432,
+				"ToPort": 5432,
 				"IpProtocol": "tcp",
 				"SourceSecurityGroupId": assertions.Match_AnyValue(),
 			},

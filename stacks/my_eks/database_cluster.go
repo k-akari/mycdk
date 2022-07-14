@@ -9,19 +9,21 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewDatabaseCluster(stack constructs.Construct, vpc ec2.Vpc, eksCluster eks.Cluster) {
+func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbCluster rds.DatabaseCluster) {
+	secretsName := jsii.String("database-secrets")
+
 	// DBクラスターの作成
-	dbCluster := rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
+	dbCluster = rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
 		Engine: rds.DatabaseClusterEngine_AuroraPostgres(&rds.AuroraPostgresClusterEngineProps{
 			Version: rds.AuroraPostgresEngineVersion_VER_13_6(),
 		}),
 		ClusterIdentifier: jsii.String("cluster-identifier"),
 		InstanceIdentifierBase: jsii.String("db-instance-identifier"),
 		Credentials: rds.Credentials_FromGeneratedSecret(jsii.String("postgres"), &rds.CredentialsBaseOptions{
-			SecretName: jsii.String("database-secrets"),
+			SecretName: secretsName,
 		}),
 		InstanceProps: &rds.InstanceProps{
-			Vpc: vpc,
+			Vpc: eksCluster.Vpc(),
 			VpcSubnets: &ec2.SubnetSelection{
 				SubnetType: ec2.SubnetType_PRIVATE_ISOLATED,
 			},
@@ -43,9 +45,11 @@ func NewDatabaseCluster(stack constructs.Construct, vpc ec2.Vpc, eksCluster eks.
 	for _, sg := range *dbCluster.SecurityGroups() {
 		sg.AddIngressRule(
 			ec2.Peer_SecurityGroupId(eksCluster.ClusterSecurityGroupId(), jsii.String("")),
-			ec2.Port_Tcp(jsii.Number(80)),
+			ec2.Port_Tcp(jsii.Number(5432)),
 			jsii.String("Allow access from EKS Node Group"),
 			jsii.Bool(true),
 		)
 	}
+
+	return
 }

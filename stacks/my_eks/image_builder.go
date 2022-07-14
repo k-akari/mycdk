@@ -9,16 +9,65 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
-	// DockerイメージをビルドしてECRへプッシュするIamRoleを作成
-	role := iam.NewRole(stack, jsii.String("EKSCodeBuildRole"), &iam.RoleProps{
+func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) (repoMigration ecr.Repository) {
+	// ビルドしたイメージを格納するECRリポジトリの作成
+	repoApp := ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
+		ImageScanOnPush: jsii.Bool(true),
+		LifecycleRules: &[]*ecr.LifecycleRule{
+			{
+				MaxImageCount: jsii.Number(1),
+			},
+		},
+		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
+		RepositoryName: jsii.String("eks-app"),
+	})
+	repoMigration = ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
+		ImageScanOnPush: jsii.Bool(true),
+		LifecycleRules: &[]*ecr.LifecycleRule{
+			{
+				MaxImageCount: jsii.Number(1),
+			},
+		},
+		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
+		RepositoryName: jsii.String("eks-migration"),
+	})
+	repoWeb := ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
+		ImageScanOnPush: jsii.Bool(true),
+		LifecycleRules: &[]*ecr.LifecycleRule{
+			{
+				MaxImageCount: jsii.Number(1),
+			},
+		},
+		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
+		RepositoryName: jsii.String("eks-web"),
+	})
+
+	// DockerイメージをビルドしてECRリポジトリへプッシュするIamRoleを作成
+	pushImagePolicy := iam.NewManagedPolicy(stack, jsii.String("PushImagePolicyForImageBuilder"), &iam.ManagedPolicyProps{
+		ManagedPolicyName: jsii.String("push-image-policy-for-image-builder"),
+		Document: iam.NewPolicyDocument(&iam.PolicyDocumentProps{
+    		Statements: &[]iam.PolicyStatement{
+          		iam.NewPolicyStatement(&iam.PolicyStatementProps{
+    				Effect: iam.Effect_ALLOW,
+    				Resources: &[]*string{repoApp.RepositoryArn(), repoMigration.RepositoryArn(), repoWeb.RepositoryArn()},
+    				Actions: &[]*string{
+    					jsii.String("ecr:BatchCheckLayerAvailability"),
+    					jsii.String("ecr:CompleteLayerUpload"),
+    					jsii.String("ecr:InitiateLayerUpload"),
+    					jsii.String("ecr:PutImage"),
+    					jsii.String("ecr:UploadLayerPart"),
+    					jsii.String("ecr:GetAuthorizationToken"),
+					},
+				}),
+			},
+    	}),
+	})
+	role := iam.NewRole(stack, jsii.String("ImageBuilderRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("codebuild.amazonaws.com"), &iam.ServicePrincipalOpts{}),
 		Description: jsii.String("Iam Role for CodeBuild Project to push image to ECR repository"),
       	Path: jsii.String("/"),
       	RoleName: jsii.String("role-codebuild-for-image-builder"),
-		ManagedPolicies: &[]iam.IManagedPolicy{
-			iam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonEC2ContainerRegistryPowerUser")),
-		},
+		ManagedPolicies: &[]iam.IManagedPolicy{pushImagePolicy,},
     })
 
 	// 指定のリポジトリのmainブランチへの更新をトリガーとして、DockerイメージをビルドしECRリポジトリへイメージをプッシュするプロジェクトを作成
@@ -49,35 +98,5 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) {
 		Timeout: cdk.Duration_Minutes(jsii.Number(20)),
 	})
 
-	// ビルドしたアプリケーションイメージを格納するリポジトリの作成
-	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
-		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
-		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
-		RepositoryName: jsii.String("eks-app"),
-	})
-	ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
-		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
-		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
-		RepositoryName: jsii.String("eks-migration"),
-	})
-	ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
-		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
-		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
-		RepositoryName: jsii.String("eks-web"),
-	})
+	return
 }
