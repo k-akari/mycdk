@@ -45,6 +45,7 @@ func TestNewEksClusterStack(t *testing.T) {
 	template.ResourceCountIs(jsii.String("Custom::AWSCDK-EKS-Cluster"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::EKS::Nodegroup"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::EC2::VPCEndpoint"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::EC2::LaunchTemplate"), jsii.Number(1));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("Custom::AWSCDK-EKS-Cluster"), map[string]interface{}{

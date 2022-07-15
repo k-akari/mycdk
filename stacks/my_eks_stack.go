@@ -8,15 +8,15 @@ import (
 	constructs "github.com/aws/constructs-go/constructs/v10"
 )
 
-func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps) (cdk.Stack, eks.Cluster) {
-	stack := cdk.NewStack(scope, &id, props)
+func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps) (stack cdk.Stack, eksCluster eks.Cluster) {
+	stack = cdk.NewStack(scope, &id, props)
 
 	vpc := myeks.NewNetwork(stack)
-	eksCluster := myeks.NewEksCluster(stack, vpc)
+	eksCluster = myeks.NewEksCluster(stack, vpc)
 	myeks.NewIamRolesForServiceAccounts(stack, eksCluster)
 	dbCluster := myeks.NewDatabaseCluster(stack, eksCluster)
 	repoMigrate := myeks.NewImageBuilder(stack, props)
 	myeks.NewDBMigrator(stack, repoMigrate, dbCluster, props)
 
-	return stack, eksCluster
+	return
 }

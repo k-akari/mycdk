@@ -8,7 +8,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
+func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) (cluster eks.Cluster) {
 	// EKSコントロールプレーンに付与するIAMロールの作成
 	masterRole := iam.NewRole(stack, jsii.String("EKSMasterRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("eks.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -21,7 +21,7 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
     })
 
 	// EKSクラスターの作成
-	cluster := eks.NewCluster(stack, jsii.String("EKSCluster"), &eks.ClusterProps{
+	cluster = eks.NewCluster(stack, jsii.String("EKSCluster"), &eks.ClusterProps{
 		AlbController: &eks.AlbControllerOptions{
 			Version: eks.AlbControllerVersion_V2_4_1(),
 		},
@@ -132,5 +132,5 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) eks.Cluster {
 		SecurityGroups: &[]ec2.ISecurityGroup{sgVpcEndpoint,},
 	})
 
-	return cluster
+	return
 }
