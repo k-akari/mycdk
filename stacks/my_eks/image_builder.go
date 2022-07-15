@@ -13,36 +13,25 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) (repoMig
 	// ビルドしたイメージを格納するECRリポジトリの作成
 	repoApp := ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
+		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-app"),
 	})
 	repoMigration = ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
+		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-migration"),
 	})
 	repoWeb := ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
-		LifecycleRules: &[]*ecr.LifecycleRule{
-			{
-				MaxImageCount: jsii.Number(1),
-			},
-		},
+		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-web"),
 	})
 
 	// DockerイメージをビルドしてECRリポジトリへプッシュするIamRoleを作成
+	// [ref] https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-push.html#image-push-iam
 	pushImagePolicy := iam.NewManagedPolicy(stack, jsii.String("PushImagePolicyForImageBuilder"), &iam.ManagedPolicyProps{
 		ManagedPolicyName: jsii.String("push-image-policy-for-image-builder"),
 		Document: iam.NewPolicyDocument(&iam.PolicyDocumentProps{
@@ -51,11 +40,17 @@ func NewImageBuilder(stack constructs.Construct, props *cdk.StackProps) (repoMig
     				Effect: iam.Effect_ALLOW,
     				Resources: &[]*string{repoApp.RepositoryArn(), repoMigration.RepositoryArn(), repoWeb.RepositoryArn()},
     				Actions: &[]*string{
-    					jsii.String("ecr:BatchCheckLayerAvailability"),
     					jsii.String("ecr:CompleteLayerUpload"),
-    					jsii.String("ecr:InitiateLayerUpload"),
-    					jsii.String("ecr:PutImage"),
     					jsii.String("ecr:UploadLayerPart"),
+    					jsii.String("ecr:InitiateLayerUpload"),
+    					jsii.String("ecr:BatchCheckLayerAvailability"),
+    					jsii.String("ecr:PutImage"),
+					},
+				}),
+				iam.NewPolicyStatement(&iam.PolicyStatementProps{
+    				Effect: iam.Effect_ALLOW,
+    				Resources: &[]*string{jsii.String("*")},
+    				Actions: &[]*string{
     					jsii.String("ecr:GetAuthorizationToken"),
 					},
 				}),
