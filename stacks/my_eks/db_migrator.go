@@ -36,17 +36,9 @@ func NewDBMigrator(stack constructs.Construct, repo ecr.Repository, dbCluster rd
 		ManagedPolicies: &[]iam.IManagedPolicy{pullImagePolicy,},
     })
 
-	// CodeBuild Project用のセキュリティグループの作成
-	sgProject := ec2.NewSecurityGroup(stack, jsii.String("SecurityGroupForDBMigrator"), &ec2.SecurityGroupProps{
-		Vpc: dbCluster.Vpc(),
-		AllowAllOutbound: jsii.Bool(true),
-		Description: jsii.String("Security Group for DB Migrator Project"),
-		SecurityGroupName: jsii.String("SecurityGroupForDBMigrator"),
-	})
-
 	// ECRからプルしたイメージを元にDBマイグレートを行うプロジェクトを作成
-	codebuild.NewProject(stack, jsii.String("DBMigratorProject"), &codebuild.ProjectProps{
-		//AllowAllOutbound: jsii.Bool(true),
+	project := codebuild.NewProject(stack, jsii.String("DBMigratorProject"), &codebuild.ProjectProps{
+		AllowAllOutbound: jsii.Bool(true),
 		BuildSpec: codebuild.BuildSpec_FromObject(&map[string]interface{}{
 			"version": jsii.String("0.2"),
 			"phases": map[string]interface{}{
@@ -83,17 +75,9 @@ func NewDBMigrator(stack constructs.Construct, repo ecr.Repository, dbCluster rd
 		SubnetSelection: &ec2.SubnetSelection{
 			SubnetType: ec2.SubnetType_PRIVATE_WITH_NAT,
 		},
-		SecurityGroups: &[]ec2.ISecurityGroup{sgProject},
 		Timeout: cdk.Duration_Minutes(jsii.Number(20)),
 	})
 
-	// DBMigrateプロジェクトからDBクラスターへのアクセスを許可する
-	for _, sg := range *dbCluster.SecurityGroups() {
-		sg.AddIngressRule(
-			ec2.Peer_SecurityGroupId(sgProject.SecurityGroupId(), jsii.String("")),
-			ec2.Port_Tcp(jsii.Number(5432)),
-			jsii.String("Allow access to DB Cluster from CodeBuild Project"),
-			jsii.Bool(true),
-		)
-	}
+	// DB Migrator(CodeBuildプロジェクト)からDatabase clusterへのアクセスを許可する
+	project.Connections().AllowTo(dbCluster, ec2.Port_Tcp(jsii.Number(5432)), jsii.String("Allow access to Database cluster from CodeBuild project"))
 }

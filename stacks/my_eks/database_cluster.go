@@ -10,8 +10,6 @@ import (
 )
 
 func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbCluster rds.DatabaseCluster) {
-	secretsName := jsii.String("database-secrets")
-
 	// DBクラスターの作成
 	dbCluster = rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
 		Engine: rds.DatabaseClusterEngine_AuroraPostgres(&rds.AuroraPostgresClusterEngineProps{
@@ -20,7 +18,7 @@ func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbC
 		ClusterIdentifier: jsii.String("cluster-identifier"),
 		InstanceIdentifierBase: jsii.String("db-instance-identifier"),
 		Credentials: rds.Credentials_FromGeneratedSecret(jsii.String("postgres"), &rds.CredentialsBaseOptions{
-			SecretName: secretsName,
+			SecretName: jsii.String("database-secrets"),
 		}),
 		InstanceProps: &rds.InstanceProps{
 			Vpc: eksCluster.Vpc(),
@@ -42,14 +40,7 @@ func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbC
 	})
 
 	// EKSクラスターからDBクラスターへのアクセスを許可する
-	for _, sg := range *dbCluster.SecurityGroups() {
-		sg.AddIngressRule(
-			ec2.Peer_SecurityGroupId(eksCluster.ClusterSecurityGroupId(), jsii.String("")),
-			ec2.Port_Tcp(jsii.Number(5432)),
-			jsii.String("Allow access from EKS Node Group"),
-			jsii.Bool(true),
-		)
-	}
+	dbCluster.Connections().AllowFrom(eksCluster, ec2.Port_Tcp(jsii.Number(5432)), jsii.String("Allow access to Database clster from EKS cluster"))
 
 	return
 }
