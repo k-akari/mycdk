@@ -1,9 +1,10 @@
-package stacks_test
+package my_eks_test
 
 import (
-	"mycdk/stacks"
 	"os"
 	"testing"
+
+	myeks "mycdk/stacks/my_eks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -14,15 +15,12 @@ func TestNewDNSStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 
 	// テスト対象のスタックテンプレートを用意
-	testStack := stacks.NewDNSStack(app, "TestStack", &cdk.StackProps{Env: &cdk.Environment{
-	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
-	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
-	},})
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), nil)
+	myeks.NewHostZone(testStack)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
 	template.ResourceCountIs(jsii.String("AWS::Route53::HostedZone"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::Route53::RecordSet"), jsii.Number(2));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::Route53::HostedZone"), map[string]interface{}{
@@ -30,16 +28,5 @@ func TestNewDNSStack(t *testing.T) {
 			"Comment": assertions.Match_AnyValue(),
 		},
 		"Name": os.Getenv("DOMAIN") + ".",
-	})
-	template.HasResourceProperties(jsii.String("AWS::Route53::RecordSet"), map[string]interface{}{
-		"Name": os.Getenv("DOMAIN") + ".",
-		"Type": "A",
-		"AliasTarget": map[string]interface{}{
-			"DNSName": assertions.Match_AnyValue(),
-			"HostedZoneId": assertions.Match_AnyValue(),
-		},
-		"HostedZoneId": map[string]interface{}{
-			"Ref": assertions.Match_AnyValue(),
-		},
 	})
 }

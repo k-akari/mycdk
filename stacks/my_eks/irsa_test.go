@@ -26,8 +26,8 @@ func TestNewIamRolesForServiceAccounts(t *testing.T) {
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
-	template.ResourceCountIs(jsii.String("AWS::IAM::Role"), jsii.Number(7)); // eks.NewClusterによって作成されるIamRoleが6つ
-	template.ResourceCountIs(jsii.String("AWS::IAM::ManagedPolicy"), jsii.Number(1));
+	template.ResourceCountIs(jsii.String("AWS::IAM::Role"), jsii.Number(8)); // eks.NewClusterによって作成されるIamRoleが6つ
+	template.ResourceCountIs(jsii.String("AWS::IAM::ManagedPolicy"), jsii.Number(3));
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::IAM::ManagedPolicy"), map[string]interface{}{
