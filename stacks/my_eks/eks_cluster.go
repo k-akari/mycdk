@@ -106,31 +106,15 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) (cluster eks.Cluster
 		},
 	})
 
-	// VPCエンドポイント用のセキュリティグループの作成
-	sgVpcEndpoint := ec2.NewSecurityGroup(stack, jsii.String("SecurityGroupForVPCEndpoint"), &ec2.SecurityGroupProps{
-		Vpc: vpc,
-		AllowAllOutbound: jsii.Bool(true),
-		Description: jsii.String("Security Group for Interface-typed VPC Endpoint"),
-		SecurityGroupName: jsii.String("SecurityGroupForVPCEndpoint"),
-	})
-
-	// EKSクラスターからVPCエンドポイントへのアクセスを許可
-	sgVpcEndpoint.AddIngressRule(
-		ec2.Peer_SecurityGroupId(cluster.ClusterSecurityGroupId(), jsii.String("")),
-		ec2.Port_AllTraffic(),
-		jsii.String(""),
-		jsii.Bool(false),
-	)
-
 	// インターフェイス型のVPCエンドポイントの作成
 	// ノードグループがプライベートリンクを利用してECRからイメージを取得する
-	vpc.AddInterfaceEndpoint(jsii.String("VPCEndpoint"), &ec2.InterfaceVpcEndpointOptions{
+	vpcEndpoint := vpc.AddInterfaceEndpoint(jsii.String("VPCEndpoint"), &ec2.InterfaceVpcEndpointOptions{
 		Service: ec2.InterfaceVpcEndpointAwsService_ECR(),
 		Subnets: &ec2.SubnetSelection{
 			Subnets: vpc.PrivateSubnets(),
 		},
-		SecurityGroups: &[]ec2.ISecurityGroup{sgVpcEndpoint,},
 	})
+	vpcEndpoint.Connections().AllowFrom(cluster, ec2.Port_AllTraffic(), jsii.String("Allow access to VPC endpoint from EKS cluster"))
 
 	return
 }
