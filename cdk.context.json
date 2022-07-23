@@ -181,5 +181,10 @@
   "security-group:account=575428171781:region=ap-northeast-1:securityGroupId=sg-0b5f2e5ee750f64c9": {
     "securityGroupId": "sg-0b5f2e5ee750f64c9",
     "allowAllOutbound": false
-  }
+  },
+  "endpoint-service-availability-zones:account=575428171781:region=ap-northeast-1:serviceName=com.amazonaws.ap-northeast-1.ecr.api": [
+    "ap-northeast-1a",
+    "ap-northeast-1c",
+    "ap-northeast-1d"
+  ]
 }

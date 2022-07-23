@@ -8,7 +8,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) (cluster eks.Cluster) {
+func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc, vpcEndpoint ec2.InterfaceVpcEndpoint) (cluster eks.Cluster) {
 	// EKSコントロールプレーンに付与するIAMロールの作成
 	masterRole := iam.NewRole(stack, jsii.String("EKSMasterRole"), &iam.RoleProps{
       	AssumedBy: iam.NewServicePrincipal(jsii.String("eks.amazonaws.com"), &iam.ServicePrincipalOpts{}),
@@ -28,10 +28,13 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) (cluster eks.Cluster
 		ClusterName: jsii.String("eks-cluster"),
 		DefaultCapacity: jsii.Number(0), // デフォルトインスタンスは作らない
 		EndpointAccess: eks.EndpointAccess_PUBLIC(),
-		MastersRole: masterRole, // クラスターのマスターロール
-		Version: eks.KubernetesVersion_Of(jsii.String("1.22")), // kubernetesのバージョン
-		Vpc: vpc, // EKSクラスターをデプロイするVPC
+		MastersRole: masterRole,
+		Version: eks.KubernetesVersion_Of(jsii.String("1.22")),
+		Vpc: vpc,
 	})
+
+	// ノードグループがプライベートリンクを利用してECRからイメージを取得する
+	vpcEndpoint.Connections().AllowFrom(cluster, ec2.Port_AllTraffic(), jsii.String("Allow access to VPC endpoint from EKS cluster"))
 
 	// Nodeに付与するIAMロールの作成
 	nodeRole := iam.NewRole(stack, jsii.String("EKSNodeRole"), &iam.RoleProps{
@@ -105,16 +108,6 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc) (cluster eks.Cluster
 			jsii.String("system:masters"),
 		},
 	})
-
-	// インターフェイス型のVPCエンドポイントの作成
-	// ノードグループがプライベートリンクを利用してECRからイメージを取得する
-	vpcEndpoint := vpc.AddInterfaceEndpoint(jsii.String("VPCEndpoint"), &ec2.InterfaceVpcEndpointOptions{
-		Service: ec2.InterfaceVpcEndpointAwsService_ECR(),
-		Subnets: &ec2.SubnetSelection{
-			Subnets: vpc.PrivateSubnets(),
-		},
-	})
-	vpcEndpoint.Connections().AllowFrom(cluster, ec2.Port_AllTraffic(), jsii.String("Allow access to VPC endpoint from EKS cluster"))
 
 	return
 }

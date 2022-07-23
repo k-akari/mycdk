@@ -6,10 +6,10 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewNetwork(stack constructs.Construct) ec2.Vpc {
+func NewNetwork(stack constructs.Construct) (vpc ec2.Vpc, vpcEndpoint ec2.InterfaceVpcEndpoint ) {
 	// 3AZにまたがるVPCの作成
 	// AZ毎にパブリックサブネットとNATゲートウェイへルートを向けたプライベートサブネットと完全に独立したプライベートサブネットを1つずつ作成
-	vpc := ec2.NewVpc(stack, jsii.String("VPC"), &ec2.VpcProps{
+	vpc = ec2.NewVpc(stack, jsii.String("VPC"), &ec2.VpcProps{
 		Cidr: jsii.String("10.0.0.0/16"),
 		MaxAzs: jsii.Number(2),
 		SubnetConfiguration: &[]*ec2.SubnetConfiguration{
@@ -32,5 +32,11 @@ func NewNetwork(stack constructs.Construct) ec2.Vpc {
 		VpcName: jsii.String("vpc-for-eks-cluster"),
 	})
 
-	return vpc
+	// VPCエンドポイントの作成
+	vpcEndpoint = vpc.AddInterfaceEndpoint(jsii.String("VPCEndpoint"), &ec2.InterfaceVpcEndpointOptions{
+		Service: ec2.InterfaceVpcEndpointAwsService_ECR(),
+		LookupSupportedAzs: jsii.Bool(true),
+	})
+
+	return
 }

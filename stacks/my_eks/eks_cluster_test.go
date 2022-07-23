@@ -38,7 +38,11 @@ func TestNewEksClusterStack(t *testing.T) {
 			},
 		},
 	})
-	myeks.NewEksCluster(testStack, vpc)
+	vpcEndpoint := vpc.AddInterfaceEndpoint(jsii.String("VPCEndpoint"), &ec2.InterfaceVpcEndpointOptions{
+		Service: ec2.InterfaceVpcEndpointAwsService_ECR(),
+		LookupSupportedAzs: jsii.Bool(true),
+	})
+	myeks.NewEksCluster(testStack, vpc, vpcEndpoint)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認

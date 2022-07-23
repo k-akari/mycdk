@@ -11,7 +11,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewDBMigrator(stack constructs.Construct, repo ecr.Repository, dbCluster rds.DatabaseCluster, props *cdk.StackProps) {
+func NewDBMigrator(stack constructs.Construct, repo ecr.Repository, dbCluster rds.DatabaseCluster, vpcEndpoint ec2.InterfaceVpcEndpoint, props *cdk.StackProps) {
 	// DockerイメージをプルするIamRoleを作成
 	pullImagePolicy := iam.NewManagedPolicy(stack, jsii.String("PullImagePolicyForDBMigrator"), &iam.ManagedPolicyProps{
 		ManagedPolicyName: jsii.String("pull-image-policy-for-db-migrator"),
@@ -72,12 +72,12 @@ func NewDBMigrator(stack constructs.Construct, repo ecr.Repository, dbCluster rd
 		QueuedTimeout: cdk.Duration_Hours(jsii.Number(1)),
 		Role: role,
 		Vpc: dbCluster.Vpc(),
-		SubnetSelection: &ec2.SubnetSelection{
-			SubnetType: ec2.SubnetType_PRIVATE_WITH_NAT,
-		},
 		Timeout: cdk.Duration_Minutes(jsii.Number(20)),
 	})
 
 	// DB Migrator(CodeBuildプロジェクト)からDatabase clusterへのアクセスを許可する
 	project.Connections().AllowTo(dbCluster, ec2.Port_Tcp(jsii.Number(5432)), jsii.String("Allow access to Database cluster from CodeBuild project"))
+
+	// DB Migrator(CodeBuildプロジェクト)からVPCエンドポイントへのアクセスを許可する
+	project.Connections().AllowTo(vpcEndpoint, ec2.Port_AllTraffic(), jsii.String("Allow access to VPC endpoint from CodeBuild project"))
 }

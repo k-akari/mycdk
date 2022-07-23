@@ -51,7 +51,6 @@ func TestNewDatabaseCluster(t *testing.T) {
 	template.ResourceCountIs(jsii.String("AWS::RDS::DBInstance"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::SecretsManager::Secret"), jsii.Number(1));
 	template.ResourceCountIs(jsii.String("AWS::SecretsManager::SecretTargetAttachment"), jsii.Number(1));
-	template.ResourceCountIs(jsii.String("AWS::EC2::SecurityGroup"), jsii.Number(2)); // テスト用に作成したsgAlbも含まれるため
 
 	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("AWS::RDS::DBCluster"), map[string]interface{}{
@@ -79,19 +78,5 @@ func TestNewDatabaseCluster(t *testing.T) {
 	})
 	template.HasResourceProperties(jsii.String("AWS::SecretsManager::Secret"), map[string]interface{}{
 		"Name": "database-secrets",
-	})
-	template.HasResourceProperties(jsii.String("AWS::EC2::SecurityGroup"), map[string]interface{}{
-		"SecurityGroupIngress": []map[string]interface{}{
-			{
-				"Description": assertions.Match_AnyValue(),
-				"FromPort": 5432,
-				"ToPort": 5432,
-				"IpProtocol": "tcp",
-				"SourceSecurityGroupId": assertions.Match_AnyValue(),
-			},
-		},
-		"VpcId": map[string]interface{}{
-			"Ref": assertions.Match_AnyValue(),
-		},
 	})
 }

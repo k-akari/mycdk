@@ -10,12 +10,12 @@ import (
 func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps) (stack cdk.Stack) {
 	stack = cdk.NewStack(scope, &id, props)
 
-	vpc := myeks.NewNetwork(stack)
-	eksCluster := myeks.NewEksCluster(stack, vpc)
+	vpc, vpcEndpoint := myeks.NewNetwork(stack)
+	eksCluster := myeks.NewEksCluster(stack, vpc, vpcEndpoint)
 	myeks.NewIamRolesForServiceAccounts(stack, eksCluster)
 	dbCluster := myeks.NewDatabaseCluster(stack, eksCluster)
 	repoMigrate := myeks.NewImageBuilder(stack, props)
-	myeks.NewDBMigrator(stack, repoMigrate, dbCluster, props)
+	myeks.NewDBMigrator(stack, repoMigrate, dbCluster, vpcEndpoint, props)
 	myeks.NewHostZone(stack)
 
 	return
