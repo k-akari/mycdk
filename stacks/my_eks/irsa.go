@@ -37,8 +37,8 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 	})
 	
 	iam.NewRole(stack, jsii.String("CreateSecretFromSecretsManagerRole"), &iam.RoleProps{
-    AssumedBy: principalESO,
-    RoleName: jsii.String("create-secret-from-secrets-manager-role"),
+    	AssumedBy: principalESO,
+    	RoleName: jsii.String("create-secret-from-secrets-manager-role"),
 		ManagedPolicies: &[]iam.IManagedPolicy{secretAccessPolicy,},
   	})
 
@@ -82,8 +82,8 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 	})
 
 	iam.NewRole(stack, jsii.String("EditRoute53RecordRole"), &iam.RoleProps{
-    AssumedBy: principalExternalDNS,
-    RoleName: jsii.String("role-for-external-dns"),
+    	AssumedBy: principalExternalDNS,
+    	RoleName: jsii.String("role-for-external-dns"),
 		ManagedPolicies: &[]iam.IManagedPolicy{changeRecordSetsPolicy, listRecordSetsPolicy},
   	})
 }
