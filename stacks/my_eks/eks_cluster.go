@@ -16,7 +16,6 @@ func NewEksCluster(stack constructs.Construct, vpc ec2.Vpc, vpcEndpoint ec2.Inte
       	RoleName: jsii.String("eks-master-role"),
 		ManagedPolicies: &[]iam.IManagedPolicy{
 			iam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonEKSClusterPolicy")),
-			iam.ManagedPolicy_FromAwsManagedPolicyName(jsii.String("AmazonEKSServicePolicy")),
 		},
     })
 
