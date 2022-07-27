@@ -86,4 +86,37 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
     	RoleName: jsii.String("role-for-external-dns"),
 		ManagedPolicies: &[]iam.IManagedPolicy{changeRecordSetsPolicy, listRecordSetsPolicy},
   	})
+
+	// ArgoCD Image UpdaterがECRリポジトリのイメージタグ情報を取得するためのIAMロール
+	principalArgoCDImageUpdater := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
+		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForArgoCDImageUpdater"), &cdk.CfnJsonProps{
+			Value: map[string]string{
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-for-image-updater",
+			},
+		}),
+	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
+
+	updateImagePolicy := iam.NewManagedPolicy(stack, jsii.String("UpdateImagePolicy"), &iam.ManagedPolicyProps{
+		ManagedPolicyName: jsii.String("argocd-update-image-policy"),
+		Document: iam.NewPolicyDocument(&iam.PolicyDocumentProps{
+    		Statements: &[]iam.PolicyStatement{
+          		iam.NewPolicyStatement(&iam.PolicyStatementProps{
+    				Effect: iam.Effect_ALLOW,
+    				Resources: &[]*string{jsii.String("*")},
+    				Actions: &[]*string{
+    					jsii.String("ecr:GetAuthorizationToken"),
+    					jsii.String("ecr:ListImages"),
+    					jsii.String("ecr:BatchGetImage"),
+    					jsii.String("ecr:GetDownloadUrlForLayer"),
+					},
+				}),
+			},
+    	}),
+	})
+
+	iam.NewRole(stack, jsii.String("ArgoCDImageUpdaterRole"), &iam.RoleProps{
+    	AssumedBy: principalArgoCDImageUpdater,
+    	RoleName: jsii.String("role-for-image-updater"),
+		ManagedPolicies: &[]iam.IManagedPolicy{updateImagePolicy,},
+  	})
 }
