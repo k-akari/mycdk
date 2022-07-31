@@ -17,10 +17,6 @@ func main() {
 	stacks.NewMyEKSStack(app, "MyEKSStack", props)
 	//
 
-	// GitHubからOIDC認証でAWSへアクセスするための権限設定
-	stacks.NewGitHubActionsStack(app, "GitHubActionsStack", props)
-	//
-
 	// SSM接続でログインできて、インターネットアクセスが可能なEC2インスタンスを作成
 	stacks.NewMyEc2Stack(app, "MyEc2Stack", props)
 	//

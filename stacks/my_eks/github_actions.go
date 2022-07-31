@@ -1,4 +1,4 @@
-package stacks
+package my_eks
 
 import (
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
@@ -7,13 +7,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewGitHubActionsStack(scope constructs.Construct, id string, props *cdk.StackProps) cdk.Stack {
-	var sprops cdk.StackProps
-	if props != nil {
-		sprops = *props
-	}
-	stack := cdk.NewStack(scope, &id, &sprops)
-
+func NewGitHubActions(stack constructs.Construct, props *cdk.StackProps) {
 	// Create an Open ID Connect Provider
 	provider := iam.NewOpenIdConnectProvider(stack, jsii.String("Provider"), &iam.OpenIdConnectProviderProps{
 		Url: jsii.String("https://token.actions.githubusercontent.com"),
@@ -25,7 +19,7 @@ func NewGitHubActionsStack(scope constructs.Construct, id string, props *cdk.Sta
 	})
 
 	// Create a Federated Principal
-	federatedPrincipal := iam.NewFederatedPrincipal(provider.OpenIdConnectProviderArn(), &map[string]interface{}{
+	principalGitHub := iam.NewFederatedPrincipal(provider.OpenIdConnectProviderArn(), &map[string]interface{}{
 		"StringLike": map[string]string{"token.actions.githubusercontent.com:sub": "repo:k-akari/*"},
 		"StringEquals": map[string]string{"token.actions.githubusercontent.com:aud": "sts.amazonaws.com"},
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
@@ -39,12 +33,13 @@ func NewGitHubActionsStack(scope constructs.Construct, id string, props *cdk.Sta
     			    Effect: iam.Effect_ALLOW,
     			    Resources: &[]*string{jsii.String("*")},
     			    Actions: &[]*string{
-    			    	jsii.String("ec2:AuthorizeSecurityGroupEgress"),
-    			    	jsii.String("ec2:AuthorizeSecurityGroupIngress"),
-    			    	jsii.String("ec2:RevokeSecurityGroupEgress"),
-    			    	jsii.String("ec2:RevokeSecurityGroupIngress"),
-    			    	jsii.String("ssm:SendCommand"),
 						jsii.String("sts:GetCallerIdentity"),
+						jsii.String("ecr:GetAuthorizationToken"),
+						jsii.String("ecr:CompleteLayerUpload"),
+    					jsii.String("ecr:UploadLayerPart"),
+    					jsii.String("ecr:InitiateLayerUpload"),
+    					jsii.String("ecr:BatchCheckLayerAvailability"),
+    					jsii.String("ecr:PutImage"),
 					},
 				}),
 			},
@@ -53,12 +48,10 @@ func NewGitHubActionsStack(scope constructs.Construct, id string, props *cdk.Sta
 
 	// Create an Iam Role for Federated Principal
     iam.NewRole(stack, jsii.String("RoleGithub"), &iam.RoleProps{
-      	AssumedBy: federatedPrincipal,
+      	AssumedBy: principalGitHub,
       	Path: jsii.String("/"),
       	RoleName: jsii.String("role-github"),
       	Description: jsii.String("Role assumed by githubPrincipal for deploying from CI using aws cdk"),
 		ManagedPolicies: &[]iam.IManagedPolicy{githubPolicy,},
     })
-
-	return stack
 }

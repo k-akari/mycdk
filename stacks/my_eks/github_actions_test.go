@@ -1,9 +1,9 @@
-package stacks_test
+package my_eks_test
 
 import (
+	myeks "mycdk/stacks/my_eks"
+	"os"
 	"testing"
-
-	"mycdk/stacks"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
@@ -12,9 +12,19 @@ import (
 
 func TestGitHubActionsStack(t *testing.T) {
 	app := cdk.NewApp(nil)
-	stack := stacks.NewGitHubActionsStack(app, "MyStack", nil)
 
-	template := assertions.Template_FromStack(stack)
+	// テスト対象のスタックテンプレートを用意
+	props := &cdk.StackProps{Env: &cdk.Environment{
+	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
+	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
+	},}
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), props)
+	myeks.NewRepositories(testStack, props)
+	template := assertions.Template_FromStack(testStack)
+
+	// 作成されるリソース数を確認
+
+	// 作成されるリソースのプロパティを確認
 	template.HasResourceProperties(jsii.String("Custom::AWSCDKOpenIdConnectProvider"), map[string]interface{}{
 		"ServiceToken": assertions.Match_AnyValue(),
 		"ClientIDList": []string{"sts.amazonaws.com"},
