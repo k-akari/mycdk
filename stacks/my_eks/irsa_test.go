@@ -7,6 +7,7 @@ import (
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	assertions "github.com/aws/aws-cdk-go/awscdk/v2/assertions"
+	ecr "github.com/aws/aws-cdk-go/awscdk/v2/awsecr"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	jsii "github.com/aws/jsii-runtime-go"
 )
@@ -22,7 +23,10 @@ func TestNewIamRolesForServiceAccounts(t *testing.T) {
 	cluster := eks.NewCluster(testStack, jsii.String("EKSCluster"), &eks.ClusterProps{
 		Version: eks.KubernetesVersion_Of(jsii.String("1.22")), // kubernetesのバージョン
 	})
-	myeks.NewIamRolesForServiceAccounts(testStack, cluster)
+	repo := ecr.NewRepository(testStack, jsii.String("ECRRepository"), &ecr.RepositoryProps{
+		RepositoryName: jsii.String("eks-app"),
+	})
+	myeks.NewIamRolesForServiceAccounts(testStack, cluster, repo)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認

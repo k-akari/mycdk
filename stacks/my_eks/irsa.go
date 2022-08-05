@@ -2,13 +2,14 @@ package my_eks
 
 import (
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
+	ecr "github.com/aws/aws-cdk-go/awscdk/v2/awsecr"
 	eks "github.com/aws/aws-cdk-go/awscdk/v2/awseks"
 	iam "github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	constructs "github.com/aws/constructs-go/constructs/v10"
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Cluster) {
+func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Cluster, repoApp ecr.Repository) {
 	// Secrets ManagerからSecretリソース作成するPodに付与するIAMロール
 	principalESO := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
 		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountToAccessSecrets"), &cdk.CfnJsonProps{
@@ -91,7 +92,7 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 	principalArgoCDImageUpdater := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
 		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForArgoCDImageUpdater"), &cdk.CfnJsonProps{
 			Value: map[string]string{
-				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-for-image-updater",
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:argocd:argocd-image-updater", // "system:serviceaccount:<argocd-image-updaterを配置するnamespace>:<argocd-image-updaterに設定するServiceAccount名>"
 			},
 		}),
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
@@ -119,4 +120,35 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
     	RoleName: jsii.String("role-for-image-updater"),
 		ManagedPolicies: &[]iam.IManagedPolicy{updateImagePolicy,},
   	})
+
+	// DB Migrateを実行するPodがDockerイメージをプルするためのIamRole
+	principalDBMigrator := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
+		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForDBMigrator"), &cdk.CfnJsonProps{
+			Value: map[string]string{
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-for-db-migrator",
+			},
+		}),
+	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
+
+	pullImagePolicy := iam.NewManagedPolicy(stack, jsii.String("PullImagePolicyForDBMigrator"), &iam.ManagedPolicyProps{
+		ManagedPolicyName: jsii.String("pull-image-policy-for-db-migrator"),
+		Document: iam.NewPolicyDocument(&iam.PolicyDocumentProps{
+    		Statements: &[]iam.PolicyStatement{
+          		iam.NewPolicyStatement(&iam.PolicyStatementProps{
+    				Effect: iam.Effect_ALLOW,
+    				Resources: &[]*string{repoApp.RepositoryArn()},
+    				Actions: &[]*string{
+    					jsii.String("ecr:BatchGetImage"),
+    					jsii.String("ecr:GetDownloadUrlForLayer"),
+					},
+				}),
+			},
+    	}),
+	})
+
+	iam.NewRole(stack, jsii.String("DBMigratorRole"), &iam.RoleProps{
+      	AssumedBy: principalDBMigrator,
+      	RoleName: jsii.String("role-for-db-migrator"),
+		ManagedPolicies: &[]iam.IManagedPolicy{pullImagePolicy,},
+    })
 }

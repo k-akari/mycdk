@@ -7,20 +7,24 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewRepositories(stack constructs.Construct, props *cdk.StackProps) (repoMigration ecr.Repository) {
-	// ビルドしたイメージを格納するECRリポジトリの作成
-	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
+func NewRepositories(stack constructs.Construct) (repoApp ecr.Repository) {
+	// アプリケーションイメージのECRリポジトリ
+	repoApp = ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-app"),
 	})
-	repoMigration = ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
+
+	// DBマイグレーション用イメージのECRリポジトリ
+	ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
 		RepositoryName: jsii.String("eks-migration"),
 	})
+
+	// NginxイメージのECRリポジトリ
 	ecr.NewRepository(stack, jsii.String("EKSWebImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},

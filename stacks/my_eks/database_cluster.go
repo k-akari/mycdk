@@ -9,9 +9,9 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbCluster rds.DatabaseCluster) {
+func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) {
 	// DBクラスターの作成
-	dbCluster = rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
+	dbCluster := rds.NewDatabaseCluster(stack, jsii.String("DatabaseCluster"), &rds.DatabaseClusterProps{
 		Engine: rds.DatabaseClusterEngine_AuroraPostgres(&rds.AuroraPostgresClusterEngineProps{
 			Version: rds.AuroraPostgresEngineVersion_VER_13_6(),
 		}),
@@ -41,6 +41,4 @@ func NewDatabaseCluster(stack constructs.Construct, eksCluster eks.Cluster) (dbC
 
 	// EKSクラスターからDBクラスターへのアクセスを許可する
 	dbCluster.Connections().AllowFrom(eksCluster, ec2.Port_Tcp(jsii.Number(5432)), jsii.String("Allow access to Database clster from EKS cluster"))
-
-	return
 }

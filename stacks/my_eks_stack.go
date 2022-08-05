@@ -12,11 +12,10 @@ func NewMyEKSStack(scope constructs.Construct, id string, props *cdk.StackProps)
 
 	vpc, vpcEndpoint := myeks.NewNetwork(stack)
 	eksCluster := myeks.NewEksCluster(stack, vpc, vpcEndpoint)
-	myeks.NewIamRolesForServiceAccounts(stack, eksCluster)
-	dbCluster := myeks.NewDatabaseCluster(stack, eksCluster)
-	repoMigrate := myeks.NewRepositories(stack, props)
-	myeks.NewGitHubActions(stack, props)
-	myeks.NewDBMigrator(stack, repoMigrate, dbCluster, vpcEndpoint, props)
+	repoApp := myeks.NewRepositories(stack)
+	myeks.NewIamRolesForServiceAccounts(stack, eksCluster, repoApp)
+	myeks.NewDatabaseCluster(stack, eksCluster)
+	myeks.NewGitHubActions(stack)
 	myeks.NewHostZone(stack)
 
 	return

@@ -18,7 +18,7 @@ func NewHostZone(stack constructs.Construct) {
 	})
 
 	acm.NewCertificate(stack, jsii.String("Certificate"), &acm.CertificateProps{
-		DomainName: jsii.String("mycdk-app-example.tk"),
+		DomainName: jsii.String(os.Getenv("DOMAIN")),
 		Validation: acm.CertificateValidation_FromDns(hostedZone),
 	})
 }

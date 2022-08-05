@@ -19,7 +19,7 @@ func TestGitHubActionsStack(t *testing.T) {
 	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
 	},}
 	testStack := cdk.NewStack(app, jsii.String("TestStack"), props)
-	myeks.NewRepositories(testStack, props)
+	myeks.NewGitHubActions(testStack)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認

@@ -1,13 +1,12 @@
 package my_eks
 
 import (
-	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
 	iam "github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	constructs "github.com/aws/constructs-go/constructs/v10"
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewGitHubActions(stack constructs.Construct, props *cdk.StackProps) {
+func NewGitHubActions(stack constructs.Construct) {
 	// Create an Open ID Connect Provider
 	provider := iam.NewOpenIdConnectProvider(stack, jsii.String("Provider"), &iam.OpenIdConnectProviderProps{
 		Url: jsii.String("https://token.actions.githubusercontent.com"),

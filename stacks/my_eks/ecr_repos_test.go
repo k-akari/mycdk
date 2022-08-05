@@ -2,7 +2,6 @@ package my_eks_test
 
 import (
 	myeks "mycdk/stacks/my_eks"
-	"os"
 	"testing"
 
 	cdk "github.com/aws/aws-cdk-go/awscdk/v2"
@@ -14,12 +13,8 @@ func TestImageBuilderStack(t *testing.T) {
 	app := cdk.NewApp(nil)
 	
 	// テスト対象のスタックテンプレートを用意
-	props := &cdk.StackProps{Env: &cdk.Environment{
-	 	Account: jsii.String(os.Getenv("CDK_DEFAULT_ACCOUNT")),
-	 	Region:  jsii.String(os.Getenv("CDK_DEFAULT_REGION")),
-	},}
-	testStack := cdk.NewStack(app, jsii.String("TestStack"), props)
-	myeks.NewRepositories(testStack, props)
+	testStack := cdk.NewStack(app, jsii.String("TestStack"), nil)
+	myeks.NewRepositories(testStack)
 	template := assertions.Template_FromStack(testStack)
 
 	// 作成されるリソース数を確認
