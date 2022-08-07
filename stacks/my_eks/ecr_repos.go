@@ -7,9 +7,9 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewRepositories(stack constructs.Construct) (repoApp ecr.Repository) {
+func NewRepositories(stack constructs.Construct) (repoMigration ecr.Repository) {
 	// アプリケーションイメージのECRリポジトリ
-	repoApp = ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
+	ecr.NewRepository(stack, jsii.String("EKSAppImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,
@@ -17,7 +17,7 @@ func NewRepositories(stack constructs.Construct) (repoApp ecr.Repository) {
 	})
 
 	// DBマイグレーション用イメージのECRリポジトリ
-	ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
+	repoMigration = ecr.NewRepository(stack, jsii.String("EKSMigrationImageRepository"), &ecr.RepositoryProps{
 		ImageScanOnPush: jsii.Bool(true),
 		LifecycleRules: &[]*ecr.LifecycleRule{{MaxImageCount: jsii.Number(1),},},
 		RemovalPolicy: cdk.RemovalPolicy_DESTROY,

@@ -9,7 +9,7 @@ import (
 	jsii "github.com/aws/jsii-runtime-go"
 )
 
-func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Cluster, repoApp ecr.Repository) {
+func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Cluster, repoMigration ecr.Repository) {
 	// Secrets ManagerからSecretリソース作成するPodに付与するIAMロール
 	principalESO := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
 		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountToAccessSecrets"), &cdk.CfnJsonProps{
@@ -136,7 +136,7 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
     		Statements: &[]iam.PolicyStatement{
           		iam.NewPolicyStatement(&iam.PolicyStatementProps{
     				Effect: iam.Effect_ALLOW,
-    				Resources: &[]*string{repoApp.RepositoryArn()},
+    				Resources: &[]*string{repoMigration.RepositoryArn()},
     				Actions: &[]*string{
     					jsii.String("ecr:BatchGetImage"),
     					jsii.String("ecr:GetDownloadUrlForLayer"),
