@@ -20,6 +20,9 @@ func main() {
 	// SSM接続でログインできて、インターネットアクセスが可能なEC2インスタンスを作成
 	stacks.NewMyEc2Stack(app, "MyEc2Stack", props)
 	//
+
+	// 定期的に月々のAWS累計利用料をLINE通知するアーキテクチャ
+	stacks.NewNotifyAWSBillingStack(app, "NotifyAWSBillingStack", props)
 	
 	app.Synth(nil)
 }

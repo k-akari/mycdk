@@ -37,3 +37,6 @@ dist/
 
 # tmp directory
 tmp
+
+go.work
+go.work.sum
