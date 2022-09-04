@@ -12,9 +12,9 @@ import (
 func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Cluster, repoMigration ecr.Repository) {
 	// Secrets ManagerからSecretリソース作成するPodに付与するIAMロール
 	principalESO := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
-		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountToAccessSecrets"), &cdk.CfnJsonProps{
+		"StringLike": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountToAccessSecrets"), &cdk.CfnJsonProps{
 			Value: map[string]string{
-				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-to-access-secrets",
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:*",
 			},
 		}),
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
@@ -45,9 +45,9 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 
 	// Route53のレコードを作成・更新・削除するExternal DNSのPodに付与するIAMロール
 	principalExternalDNS := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
-		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForExternalDNS"), &cdk.CfnJsonProps{
+		"StringLike": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForExternalDNS"), &cdk.CfnJsonProps{
 			Value: map[string]string{
-				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-for-external-dns",
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:*",
 			},
 		}),
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
@@ -90,9 +90,9 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 
 	// ArgoCD Image UpdaterがECRリポジトリのイメージタグ情報を取得するためのIAMロール
 	principalArgoCDImageUpdater := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
-		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForArgoCDImageUpdater"), &cdk.CfnJsonProps{
+		"StringLike": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForArgoCDImageUpdater"), &cdk.CfnJsonProps{
 			Value: map[string]string{
-				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:argocd:argocd-image-updater", // "system:serviceaccount:<argocd-image-updaterを配置するnamespace>:<argocd-image-updaterに設定するServiceAccount名>"
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:argocd:*", // "system:serviceaccount:<argocd-image-updaterを配置するnamespace>:<argocd-image-updaterに設定するServiceAccount名>"
 			},
 		}),
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
@@ -123,9 +123,9 @@ func NewIamRolesForServiceAccounts(stack constructs.Construct, cluster eks.Clust
 
 	// DB Migrateを実行するPodがDockerイメージをプルするためのIamRole
 	principalDBMigrator := iam.NewFederatedPrincipal(cluster.OpenIdConnectProvider().OpenIdConnectProviderArn(), &map[string]interface{}{
-		"StringEquals": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForDBMigrator"), &cdk.CfnJsonProps{
+		"StringLike": cdk.NewCfnJson(stack, jsii.String("ConditionForAccountForDBMigrator"), &cdk.CfnJsonProps{
 			Value: map[string]string{
-				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:account-for-db-migrator",
+				*cluster.ClusterOpenIdConnectIssuer()+":sub": "system:serviceaccount:main:*",
 			},
 		}),
 	}, jsii.String("sts:AssumeRoleWithWebIdentity"))
